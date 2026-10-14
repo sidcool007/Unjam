@@ -9,7 +9,7 @@ godot --headless --path . --script res://tools/validate_levels.gd # exhaustive l
 `tests/test_runner.gd` discovers `tests/test_*.gd`; each `test_*` method may `await`
 frames. UI tests drive the real `GameScreen` with taps.
 
-### Latest results (Godot 4.3.stable, this repository state)
+### Latest results (Godot 4.6.stable, this repository state; also green on 4.3)
 * **55 tests, 55 passed, 0 failed**
   * `test_board_rules` (14): legal/illegal moves, match rule, full trays, clear rule,
     reserved & one-way trays, locks (unlock on clear), ice (thaw by move count), move
@@ -21,7 +21,7 @@ frames. UI tests drive the real `GameScreen` with taps.
     rejection of mismatched session data, no re-fired win/fail signals on restore.
   * `test_hints` (4) + `test_hints_campaign` (1): hints are always legal, following hints wins,
     dead ends are detected without charging, no hint after finishing; hint-following wins
-    **all 40 levels** (worst first-hint time 82 ms on desktop).
+    **all 40 levels** (worst first-hint time ≈70–80 ms on desktop).
   * `test_campaign` (12): ≥30 levels, every level validates and its solution replays, no
     duplicates/near-duplicates, move limits feasible, mechanics debut one at a time with an
     intro card, difficulty ramp, ids/stages ordered, level 1 trivial, recorded solutions of

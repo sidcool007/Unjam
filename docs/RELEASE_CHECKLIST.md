@@ -1,6 +1,6 @@
 # Release checklist
 
-- [ ] Upgrade to a current Godot 4.x stable + templates (Play target-API rule); re-run tests/validator.
+- [ ] Confirm Play's target-API requirement (APK currently targets 35); upgrade Godot if needed and re-run tests/validator.
 - [ ] Choose and register the final application id; update both presets.
 - [ ] Install gradle build template + full Android SDK; build a release AAB.
 - [ ] Generate a **release keystore** (kept outside the repo, backed up); configure Play App Signing.

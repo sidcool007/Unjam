@@ -1,6 +1,6 @@
 # Unjam: The Last Slot
 
-A casual Android sorting puzzle built with **Godot 4.3 (GDScript)**. Move objects
+A casual Android sorting puzzle built with **Godot 4.6 (GDScript)**. Move objects
 between limited-capacity trays; only the top object moves, and you must decide
 who gets the *last free slot*. 40 original, solver-verified levels, fully offline,
 no ads, no account, **no Android permissions**.

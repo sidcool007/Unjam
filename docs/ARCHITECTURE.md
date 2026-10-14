@@ -47,7 +47,7 @@ tests/         headless test runner + test files
 * Autoloads: `Progress`, `Audio`, `Levels`, `Ads` (all used as read-mostly services).
 
 ## Gotchas learned
-* Packed arrays stored inside an `Array` alias on assignment in Godot 4.3; `clone()`
+* Packed arrays stored inside an `Array` alias on assignment (seen in Godot 4.3); `clone()`
   copies explicitly (regression test `test_clone_is_independent`).
 * `Control.set_anchors_preset` alone does not size a control created in code; use
   `set_anchors_and_offsets_preset`.

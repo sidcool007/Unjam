@@ -13,3 +13,5 @@
 Notable fixes during development: `clone()` aliasing packed arrays (found by generator crash,
 regression test added); control sizing (`set_anchors_and_offsets_preset`); tests starting before
 autoload `_ready`; move limits widened from par+3..5 to par+45 % after judging them too harsh.
+
+Upgrade: moved the toolchain from Godot 4.3 to 4.6 (tests/validator green on both); debug APK now targets API 35, still no permissions.

@@ -2,8 +2,8 @@
 
 **Release blockers / unverified**
 1. **Never run on a device or emulator.** See TESTING.md for the manual plan.
-2. **Target API:** Godot 4.3 templates target API 34; Play Store needs a newer target →
-   upgrade Godot first. No AAB was built; no release signing key exists (by design).
+2. **Target API:** the project builds with Godot 4.6 (targets API 35). Confirm Play's current
+   requirement at submission time. No AAB was built; no release signing key exists (by design).
 3. Application id `com.unjam.thelastslot` is a placeholder.
 4. Audio unverified by ear; levels unverified by human playtesters (difficulty and the
    45 % move-limit slack are judgement calls backed by solver numbers only).
@@ -21,4 +21,4 @@
 * Portrait phones only; tablets/landscape are letterboxed/untested.
 * Replays pay no coins, so coins are finite (≈ 40 levels × ≤30 + 30 start ≈ 1 200 total).
 * Rewarded ads are an interface only; no provider exists.
-* Debug APK is large (~48 MB) because it embeds the debug engine template.
+* Debug APK is large (~55 MB) because it embeds the debug engine template.
