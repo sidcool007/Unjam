@@ -1,0 +1,9 @@
+{
+  "format": 1,
+  "levels": [
+    {"id":1,"name":"First Steps","stage":1,"types":2,"trays":[{"cap":3,"items":[]},{"cap":3,"items":[0,1,0]},{"cap":3,"items":[]},{"cap":3,"items":[1,0,1]}],"intro":"basics","seed":1001,"solution":[[1,0],[1,2],[0,1],[3,2],[3,1],[3,2]],"par":6},
+    {"id":2,"name":"Three Colours","stage":1,"types":3,"trays":[{"cap":3,"items":[]},{"cap":3,"items":[2,0,0]},{"cap":3,"items":[0,2,1]},{"cap":3,"items":[1,2,1]},{"cap":3,"items":[]}],"seed":2000,"solution":[[1,0],[1,0],[2,4],[2,1],[2,0],[3,4],[3,1],[3,4]],"par":8},
+    {"id":3,"name":"Spare Room","stage":1,"types":3,"trays":[{"cap":3,"items":[]},{"cap":3,"items":[2,0,2]},{"cap":3,"items":[0,1,0]},{"cap":3,"items":[1,2]},{"cap":3,"items":[1]}],"seed":3015,"solution":[[1,0],[2,1],[2,4],[1,2],[1,2],[0,1],[3,1],[3,4]],"par":8},
+    {"id":4,"name":"Taller Trays","stage":1,"types":3,"trays":[{"cap":4,"items":[0,0,1,1]},{"cap":4,"items":[1,2,2,2]},{"cap":4,"items":[]},{"cap":4,"items":[]},{"cap":4,"items":[0,2,0,1]}],"seed":4000,"solution":[[1,2],[1,2],[1,2],[0,1],[0,1],[4,1],[4,0],[4,2],[4,0]],"par":9}
+  ]
+}
