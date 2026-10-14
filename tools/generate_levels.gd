@@ -40,16 +40,25 @@ func _init() -> void:
 			return
 		print("level %2d %-18s seed=%d opt=%d moves_limit=%d  %dms" % [id, lv["name"], lv["seed"], lv["par"], lv.get("max_moves", 0), Time.get_ticks_msec() - t0])
 		levels.append(lv)
-	var out := FileAccess.open("res://levels/campaign.json", FileAccess.WRITE)
-	out.store_string(_pretty(levels))
-	out.close()
+		_write(levels)  # incremental: a crash or timeout never loses finished levels
+	_write(levels)
 	print("wrote %d levels" % levels.size())
 	quit(0)
 
 
+func _write(levels: Array) -> void:
+	var out := FileAccess.open("res://levels/campaign.json", FileAccess.WRITE)
+	out.store_string(_pretty(levels))
+	out.close()
+
+
 func _make_level(id: int, spec: Dictionary) -> Dictionary:
 	var base_seed: int = int(spec.get("seed0", id * 1000))
+	var started := Time.get_ticks_msec()
+	var limit_ms: int = int(spec.get("time_limit_s", 90)) * 1000
 	for attempt in 4000:
+		if Time.get_ticks_msec() - started > limit_ms:
+			return {}
 		var seed_v := base_seed + attempt
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seed_v
@@ -61,7 +70,7 @@ func _make_level(id: int, spec: Dictionary) -> Dictionary:
 		var board := BoardState.from_level(lv)
 		if board.is_won() or not board.has_legal_move():
 			continue
-		var budget: int = int(spec.get("budget", 150000))
+		var budget: int = int(spec.get("budget", 60000))
 		var opt := Solver.solve_optimal(board, budget)
 		var moves: Array
 		var par: int

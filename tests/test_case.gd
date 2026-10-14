@@ -2,6 +2,7 @@ class_name TestCase
 extends RefCounted
 
 var failures: Array = []
+var tree: SceneTree  # set by the runner (for async UI tests)
 
 
 func check(cond: bool, msg: String = "check failed") -> void:

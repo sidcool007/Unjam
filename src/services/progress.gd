@@ -231,7 +231,7 @@ func apply_dict(d: Variant) -> bool:
 	var cl = d.get("current_level")
 	if cl is float or cl is int:
 		current_level = clampi(int(cl), 1, highest_unlocked)
-	tutorial_done = d.get("tutorial_done") == true
+	tutorial_done = d.get("tutorial_done") is bool and d["tutorial_done"]
 	var si = d.get("seen_intros")
 	if si is Array:
 		for x in si:
@@ -274,7 +274,8 @@ func load_data() -> void:
 		var f := FileAccess.open(candidate, FileAccess.READ)
 		if f == null:
 			continue
-		var parsed = JSON.parse_string(f.get_as_text())
+		var json := JSON.new()
+		var parsed = json.data if json.parse(f.get_as_text()) == OK else null
 		if apply_dict(parsed):
 			load_status = "ok" if candidate == save_path else "recovered_backup"
 			return

@@ -3,7 +3,8 @@ extends SceneTree
 ## Runs every tests/test_*.gd; each file defines test_* methods taking no args
 ## and uses the inherited assert helpers (see tests/test_case.gd).
 
-func _init() -> void:
+func _initialize() -> void:
+	await process_frame  # let autoloads run _ready()
 	var total := 0
 	var failed := 0
 	var failures: Array = []
@@ -16,6 +17,7 @@ func _init() -> void:
 	for f in files:
 		var script: GDScript = load("res://tests/" + f)
 		var tc = script.new()
+		tc.tree = self
 		var methods: Array = []
 		for m in script.get_script_method_list():
 			if String(m["name"]).begins_with("test_"):
@@ -26,7 +28,7 @@ func _init() -> void:
 			tc.failures.clear()
 			if tc.has_method("before_each"):
 				tc.before_each()
-			tc.call(m)
+			await tc.call(m)
 			if tc.has_method("after_each"):
 				tc.after_each()
 			if tc.failures.is_empty():

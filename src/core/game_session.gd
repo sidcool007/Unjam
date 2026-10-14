@@ -109,7 +109,6 @@ func restore_from(d: Variant) -> bool:
 		var s := {"stacks": h["stacks"], "moves": int(h["moves"]), "cleared": int(h["cleared"])}
 		history.append(s)
 	status = Status.PLAYING
-	_terminal_emitted = false
-	_update_status()
 	_terminal_emitted = true  # restoring never re-fires win/fail signals
+	_update_status()
 	return true
