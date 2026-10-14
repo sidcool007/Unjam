@@ -31,6 +31,18 @@ const FONT_SMALL := 22
 const MIN_TOUCH := 88  # logical px (>= 48dp on every common phone at 720 wide)
 
 
+static var _bold: FontVariation
+
+
+## Emboldened variant of the default font (no font files shipped).
+static func bold() -> Font:
+	if _bold == null:
+		_bold = FontVariation.new()
+		_bold.base_font = ThemeDB.fallback_font
+		_bold.variation_embolden = 0.55
+	return _bold
+
+
 static func box(color: Color, radius: int = 24, border: Color = Color(0, 0, 0, 0), border_w: int = 0, shadow: bool = false) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = color
@@ -49,6 +61,8 @@ static func label(text: String, size: int = FONT_BODY, color: Color = INK, align
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_size_override("font_size", size)
+	if size >= FONT_H2:
+		l.add_theme_font_override("font", bold())
 	l.add_theme_color_override("font_color", color)
 	l.horizontal_alignment = align
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -71,6 +85,7 @@ static func button(text: String, kind: String = "primary", font_size: int = FONT
 	b.focus_mode = Control.FOCUS_NONE
 	b.custom_minimum_size = Vector2(0, MIN_TOUCH)
 	b.add_theme_font_size_override("font_size", font_size)
+	b.add_theme_font_override("font", bold())
 	var fill := ACCENT
 	var down := ACCENT_DARK
 	var fg := Color.WHITE

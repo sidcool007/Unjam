@@ -44,8 +44,10 @@ static func draw_object(ci: CanvasItem, type: int, c: Vector2, r: float, alpha: 
 	var light := col.lightened(0.38)
 	light.a = alpha * 0.85
 	var shape: String = UI.SHAPE_NAMES[type % UI.SHAPE_NAMES.size()]
-	# soft shadow
-	ci.draw_circle(c + Vector2(0, r * 0.16), r * 0.95, Color(0.17, 0.18, 0.29, 0.14 * alpha))
+	# soft shadow (flat ellipse under the object)
+	ci.draw_set_transform(c + Vector2(0, r * 0.86), 0.0, Vector2(1.0, 0.32))
+	ci.draw_circle(Vector2.ZERO, r * 0.85, Color(0.17, 0.18, 0.29, 0.16 * alpha))
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	match shape:
 		"circle":
 			ci.draw_circle(c, r, dark)
@@ -72,13 +74,20 @@ static func _rounded_rect(ci: CanvasItem, rect: Rect2, radius: float, color: Col
 
 
 ## Padlock badge, drawn within a box of size s at p (top-left).
+## key_type >= 0 shows the shape that opens it; < 0 draws a plain keyhole.
 static func draw_lock(ci: CanvasItem, p: Vector2, s: float, key_type: int) -> void:
-	var bw := s
-	var body := Rect2(p + Vector2(0, s * 0.38), Vector2(bw, s * 0.62))
-	ci.draw_arc(p + Vector2(bw / 2.0, s * 0.42), s * 0.27, PI, TAU, 14, UI.INK, maxf(2.0, s * 0.1))
-	_rounded_rect(ci, body, s * 0.14, UI.INK)
-	# the key colour/shape the player must clear
-	draw_object(ci, key_type, body.get_center(), s * 0.19)
+	var cx := p.x + s / 2.0
+	var body := Rect2(p + Vector2(0, s * 0.42), Vector2(s, s * 0.58))
+	var sw := maxf(2.5, s * 0.13)
+	var sh_w := s * 0.28
+	var sh_top := p.y + s * 0.06
+	ci.draw_polyline(PackedVector2Array([Vector2(cx - sh_w, body.position.y + 2), Vector2(cx - sh_w, sh_top + sh_w), Vector2(cx - sh_w * 0.4, sh_top + sh_w * 0.15), Vector2(cx + sh_w * 0.4, sh_top + sh_w * 0.15), Vector2(cx + sh_w, sh_top + sh_w), Vector2(cx + sh_w, body.position.y + 2)]), UI.INK, sw, true)
+	_rounded_rect(ci, body, s * 0.16, UI.INK)
+	if key_type >= 0:
+		draw_object(ci, key_type, body.get_center() + Vector2(0, s * 0.01), s * 0.2)
+	else:
+		ci.draw_circle(body.get_center() + Vector2(0, -s * 0.04), s * 0.1, Color.WHITE)
+		ci.draw_rect(Rect2(body.get_center() + Vector2(-s * 0.03, -s * 0.02), Vector2(s * 0.06, s * 0.2)), Color.WHITE)
 
 
 static func draw_snow(ci: CanvasItem, c: Vector2, r: float, col: Color) -> void:
@@ -134,7 +143,7 @@ static func draw_icon(ci: CanvasItem, name: String, c: Vector2, r: float, col: C
 			if name == "music_off":
 				ci.draw_line(c + Vector2(-r * 0.7, r * 0.7), c + Vector2(r * 0.7, -r * 0.7), UI.ACCENT, w, true)
 		"lock":
-			draw_lock(ci, c - Vector2(r * 0.5, r * 0.6), r, 0)
+			draw_lock(ci, c - Vector2(r * 0.5, r * 0.6), r, -1)
 		"check":
 			ci.draw_polyline(PackedVector2Array([c + Vector2(-r * 0.5, 0), c + Vector2(-r * 0.12, r * 0.4), c + Vector2(r * 0.55, -r * 0.4)]), col, w * 1.2, true)
 		"close":

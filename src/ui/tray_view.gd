@@ -75,7 +75,7 @@ func _draw() -> void:
 	if is_source:
 		draw_style_box(UI.box(Color(0, 0, 0, 0), int(slot * 0.34), UI.ACCENT, 5), tr)
 	if hint_target:
-		draw_style_box(UI.box(Color(UI.WARN, 0.25), int(slot * 0.34), UI.WARN, 6), tr)
+		draw_style_box(UI.box(Color(0, 0, 0, 0), int(slot * 0.34), UI.WARN, 7), tr)
 	# slot guides (capacity cue that does not rely on colour)
 	for i in cap:
 		var c := slot_center(i)

@@ -7,14 +7,14 @@ var _toast_tween: Tween
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
 	bg.color = UI.BG
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	var ins := UI.safe_insets(get_viewport())
 	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", int(maxf(24, ins.x)))
 	margin.add_theme_constant_override("margin_right", int(maxf(24, ins.z)))
 	margin.add_theme_constant_override("margin_top", int(maxf(18, ins.y + 8)))
@@ -40,6 +40,7 @@ func _ready() -> void:
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.scroll_deadzone = 24  # a tap that wobbles slightly must not become a scroll
 	vb.add_child(scroll)
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -110,7 +111,7 @@ func _tile(id: int) -> Control:
 			for k in 3:
 				Shapes.draw_icon(b, "star" if k < st else "star_off", Vector2(b.size.x / 2.0 + (k - 1) * 36.0, 112), 14.0, UI.WARN)
 		else:
-			Shapes.draw_lock(b, Vector2(b.size.x / 2.0 - 15, 84), 30.0, 0)
+			Shapes.draw_lock(b, Vector2(b.size.x / 2.0 - 17, 82), 34.0, -1)
 	)
 	b.pressed.connect(func():
 		if unlocked:

@@ -12,8 +12,10 @@ func _draw() -> void:
 	var xs := [-170.0, -57.0, 57.0]
 	for i in 3:
 		Shapes.draw_object(self, [0, 1, 2][i], Vector2(cx + xs[i], 135), r * 0.82)
-	draw_arc(Vector2(cx + 170.0, 135), r * 0.9, 0, TAU, 40, UI.INK, 5.0, true)
-	var f := ThemeDB.fallback_font
+	var c4 := Vector2(cx + 170.0, 135)
+	for i in 12:  # dashed ring: "the last slot"
+		draw_arc(c4, r * 0.9, i * TAU / 12.0, i * TAU / 12.0 + TAU / 20.0, 6, UI.INK, 6.0, true)
+	var f: Font = UI.bold()
 	_centered(f, "UNJAM", cx, 360, 128, UI.INK)
 	_centered(f, "THE LAST SLOT", cx, 430, 38, UI.ACCENT_DARK)
 

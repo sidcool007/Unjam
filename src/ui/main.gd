@@ -7,18 +7,42 @@ var _busy := false
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	Progress.level_count = Levels.count()
 	Progress.load_data()
 	Audio.start_music()
 	_fade = ColorRect.new()
 	_fade.color = UI.BG
-	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fade.z_index = 100
 	_fade.modulate.a = 0.0
 	add_child(_fade)
 	_show(_make_splash())
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_on_back()
+
+
+## Android back button: close dialogs first, then step back through screens.
+func _on_back() -> void:
+	if _busy or _current == null:
+		return
+	for ch in _current.get_children():
+		if ch is Modal and ch.dismissible:
+			ch.close()
+			return
+		if ch is Modal:
+			return  # non-dismissible result dialogs must be answered with their buttons
+	if _current is GameScreen:
+		(_current as GameScreen).request_exit()
+	elif _current is LevelSelectScreen or _current is CreditsScreen:
+		open_menu()
+	elif _current is MenuScreen:
+		Progress.flush()
+		get_tree().quit()
 
 
 func _make_splash() -> Control:

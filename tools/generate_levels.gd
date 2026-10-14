@@ -87,7 +87,7 @@ func _make_level(id: int, spec: Dictionary) -> Dictionary:
 		lv["par"] = par
 		var slack: int = int(spec.get("limit", 0))
 		if slack > 0:
-			lv["max_moves"] = par + slack
+			lv["max_moves"] = par + maxi(slack, ceili(par * 0.45))  # generous: casual players, Undo refunds moves
 		var vr := LevelValidator.validate(lv, false)
 		if not vr["errors"].is_empty():
 			continue

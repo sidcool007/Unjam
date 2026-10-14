@@ -55,7 +55,7 @@ func _compute_layout() -> Dictionary:
 	var cell_w := size.x / cols
 	var by_h := (size.y - (rows - 1) * gap) / (rows * (maxcap + 0.3) + 0.7)
 	var by_w := (cell_w - 16.0) / 1.3
-	var slot := clampf(minf(by_h, by_w), 36.0, 96.0)
+	var slot := clampf(minf(by_h, by_w), 36.0, 112.0)
 	return {"cols": cols, "rows": rows, "maxcap": maxcap, "gap": gap, "cell_w": cell_w, "slot": slot}
 
 
@@ -71,7 +71,7 @@ func rebuild(animate: bool) -> void:
 	objs.clear()
 	_layer = Control.new()
 	_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var b := session.board
 	var lay := _compute_layout()
 	_slot = lay["slot"]
@@ -154,7 +154,7 @@ func select(tray: int) -> void:
 	var list: Array = objs[tray]
 	if not list.is_empty():
 		var ov: ObjectView = list[list.size() - 1]
-		var target := _slot_pos(tray, list.size() - 1) + Vector2(0, -_slot * 0.28)
+		var target := _slot_pos(tray, list.size() - 1) + Vector2(0, -_slot * 0.45)
 		_tween_to(ov, target, 0.1)
 	refresh()
 

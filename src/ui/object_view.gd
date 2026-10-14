@@ -36,7 +36,7 @@ func _draw() -> void:
 	var alpha := 0.55 if (locked or frozen_left > 0) else 1.0
 	Shapes.draw_object(self, type, c, r, alpha)
 	if frozen_left > 0:
-		draw_circle(c, r * 1.05, Color(UI.ICE, 0.62))
+		draw_circle(c, r * 1.05, Color(UI.ICE, 0.42))
 		draw_arc(c, r * 1.05, 0, TAU, 28, Color("7cc3e8"), maxf(2.0, size.x * 0.04), true)
 		Shapes.draw_snow(self, c + Vector2(0, -r * 0.1), r * 0.5, Color("4aa3d6"))
 		var f := ThemeDB.fallback_font
@@ -46,7 +46,7 @@ func _draw() -> void:
 		draw_string(f, c + Vector2(-w / 2.0, r * 0.78), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UI.INK)
 	if locked:
 		var key := BoardState.obj_lock(code)
-		var s := size.x * 0.46
-		var p := c + Vector2(size.x * 0.02, size.x * 0.0)
-		draw_circle(p + Vector2(s * 0.5, s * 0.55), s * 0.72, Color(1, 1, 1, 0.9))
+		var s := size.x * 0.54
+		var p := c + Vector2(size.x * 0.0, size.x * -0.02)
+		draw_circle(p + Vector2(s * 0.5, s * 0.55), s * 0.72, Color(1, 1, 1, 0.92))
 		Shapes.draw_lock(self, p, s, key)

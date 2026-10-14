@@ -1,0 +1,47 @@
+Godot Engine v4.3.stable.official.77dcf97d8 - https://godotengine.org
+
+id  name               par   limit optimal mechanics
+1   First Steps        6     0     6      
+2   Three Colours      8     0     8      
+3   Spare Room         8     0     8      
+4   Taller Trays       9     0     9      
+5   Mind the Gap       9     0     9      
+6   Small and Large    12    0     12     
+7   Four Kinds         12    0     12     
+8   Squeeze            14    0     14     
+9   Odd One Out        15    0     15     
+10  Crowded            17    0     17     
+11  Deep Dive          11    16    11     
+12  Under Pressure     18    27    18     
+13  Careful Now        18    27    18     
+14  Last Chance        21    31    21     
+15  Padlock            8     0     8      1 locks
+16  Two Locks          11    0     11     2 locks
+17  Key Order          15    22    15     2 locks
+18  Triple Lock        16    24    16     3 locks
+19  Locked In          20    29    20     3 locks
+20  Vault              22    32    22     3 locks
+21  Reserved           10    0     10     reserved
+22  Two Reserved       14    0     14     reserved, reserved
+23  Assigned Seats     15    22    15     reserved, reserved
+24  One Way            11    0     11     one-way
+25  Drain and Fill     16    24    16     one-way, reserved
+26  Traffic Control    21    31    21     one-way, reserved, reserved
+27  Cold Snap          8     0     8      2 ice
+28  Slow Thaw          11    0     11     3 ice
+29  Frostbite          15    22    15     3 ice
+30  Deep Freeze        16    24    16     4 ice
+31  Glacier            22    32    22     4 ice
+32  Whiteout           22    32    22     4 ice
+33  Thaw and Unlock    19    28    19     2 locks, 2 ice
+34  Triple Threat      18    27    18     reserved, 2 locks, 2 ice
+35  Rush Hour          22    32    22     reserved, 2 locks, 2 ice
+36  Fortress           25    37    25     one-way, 2 locks, 2 ice
+37  Needle's Eye       25    37    25     3 locks, 3 ice
+38  Grand Puzzle       26    38    26     reserved, 3 locks, 2 ice
+39  Crosswinds         24    35    24     one-way, reserved, 3 locks, 2 ice
+40  The Last Slot      24    35    24     3 locks, 3 ice
+
+40 levels, 0 errors, 0 warnings, 48.3s
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2284)

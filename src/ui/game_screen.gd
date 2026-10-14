@@ -26,7 +26,7 @@ var _tutorial := false
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var lv: Dictionary = Levels.get_level(level_id)
 	session = GameSession.new(lv)
 	_restore_saved_session()
@@ -36,6 +36,7 @@ func _ready() -> void:
 	board_view.tray_tapped.connect(_on_tray_tapped)
 	board_view.busy_changed.connect(_on_busy_changed)
 	Progress.coins_changed.connect(func(_c): _update_hud())
+	Progress.settings_changed.connect(func(): board_view.reduce_motion = bool(Progress.settings["reduce_motion"]))
 	Progress.set_current_level(level_id)
 	_update_hud()
 	_tutorial = level_id == 1 and not Progress.tutorial_done
@@ -64,11 +65,11 @@ func _after_enter() -> void:
 func _build_ui(lv: Dictionary) -> void:
 	var bg := ColorRect.new()
 	bg.color = UI.BG
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	var ins := UI.safe_insets(get_viewport())
 	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", int(maxf(20, ins.x)))
 	margin.add_theme_constant_override("margin_right", int(maxf(20, ins.z)))
 	margin.add_theme_constant_override("margin_top", int(maxf(18, ins.y + 8)))
@@ -409,6 +410,11 @@ func _apply_hint(hint: Dictionary) -> void:
 	Audio.play("coin")
 	board_view.show_hint(hint["from"], hint["to"])
 	_update_hud()
+
+
+## Android back button during play: open the pause menu (never loses progress).
+func request_exit() -> void:
+	_on_pause()
 
 
 func _on_pause() -> void:
