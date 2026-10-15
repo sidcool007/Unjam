@@ -10,7 +10,7 @@ godot --headless --path . --script res://tools/validate_levels.gd # exhaustive l
 frames. UI tests drive the real `GameScreen` with taps.
 
 ### Latest results (Godot 4.6.stable, this repository state; also green on 4.3)
-* **55 tests, 55 passed, 0 failed**
+* **67 tests, 67 passed, 0 failed**
   * `test_board_rules` (14): legal/illegal moves, match rule, full trays, clear rule,
     reserved & one-way trays, locks (unlock on clear), ice (thaw by move count), move
     limit failure, deadlock failure, exact undo, undo after failure, restart, clone independence.
@@ -29,6 +29,11 @@ frames. UI tests drive the real `GameScreen` with taps.
   * `test_ui_flow` (5): **repeated taps/undo during an animation change nothing**, full play-through
     pays the reward once (extra win callbacks pay nothing), bad tray index harmless,
     hint charging rules (never overspends), restart asks for confirmation only with progress.
+  * `test_fuzz` (4): 31 200 random taps/moves/undos/restarts over all 40 levels with invariants after every
+    action (capacity, object conservation, status vs model, exact undo, restart, legal-move enumeration
+    vs `check_move`, blocked objects never pickable); win on the final allowed move; undo across clears/locks/ice.
+  * `test_ui_fuzz` (4): random taps (also hammering during animations), undo, restart, hint and pause on 7
+    levels; after every idle point the view must mirror the model exactly (objects, positions, highlights, dialogs).
   * `test_services` (4): ad gate grants at most once, never without a request, never faked;
     audio safe with unknown/disabled sounds.
 * **Level validator:** 40 levels, **0 errors, 0 warnings**; exhaustive BFS proved every

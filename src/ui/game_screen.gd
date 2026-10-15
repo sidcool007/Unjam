@@ -52,6 +52,7 @@ func _restore_saved_session() -> void:
 
 func _after_enter() -> void:
 	if session.status != GameSession.Status.PLAYING:
+		_check_terminal()  # restored into a finished state: show its dialog
 		return
 	var intro: String = str(session.level.get("intro", ""))
 	if intro != "" and not Progress.seen_intros.has(level_id) and not session.has_progress():
@@ -147,9 +148,15 @@ func _build_ui(lv: Dictionary) -> void:
 	_toast = UI.label("", UI.FONT_BODY, Color.WHITE)
 	_toast.add_theme_stylebox_override("normal", UI.box(Color(UI.INK, 0.92), 28))
 	_toast.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_toast.custom_minimum_size = Vector2(560, 64)
-	_toast.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_toast.position = Vector2(80, 1010)
+	_toast.anchor_left = 0.08
+	_toast.anchor_right = 0.92
+	_toast.anchor_top = 1.0
+	_toast.anchor_bottom = 1.0
+	_toast.offset_left = 0
+	_toast.offset_right = 0
+	_toast.offset_top = -262
+	_toast.offset_bottom = -186
+	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast.modulate.a = 0.0
 	_toast.z_index = 20
 	add_child(_toast)

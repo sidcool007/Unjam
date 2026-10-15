@@ -15,3 +15,14 @@ regression test added); control sizing (`set_anchors_and_offsets_preset`); tests
 autoload `_ready`; move limits widened from par+3..5 to par+45 % after judging them too harsh.
 
 Upgrade: moved the toolchain from Godot 4.3 to 4.6 (tests/validator green on both); debug APK now targets API 35, still no permissions.
+
+## Core-gameplay review (before any Phase 2 work)
+Defects found by code review + randomised exploration, all fixed and covered by tests:
+1. Objects/trays drifted off their slots after rapid taps: overlapping tweens and shakes captured stale positions.
+   Now one tracked position tween per node and slot maths use canonical tray columns.
+2. Dialog buttons re-ran their action on a second tap before the dialog was freed (e.g. double Undo / double Next).
+3. A saved FAILED session restored into a screen with no failure dialog (stuck HUD).
+4. Destination highlights stayed lit during the move animation.
+5. A resize during an animation left a stale layout (now re-laid-out when the animation ends).
+6. Toasts used fixed pixel positions and could overlap the board on tall phones (now bottom-anchored).
+No rule-engine defects were found: 31 200 randomised actions held every invariant.

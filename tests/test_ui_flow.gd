@@ -13,7 +13,7 @@ func before_each() -> void:
 	Progress.settings["reduce_motion"] = false
 
 
-func _open(level: int) -> void:
+func _open(level: int, dismiss_dialogs: bool = true) -> void:
 	_stub = load("res://tests/stub_main.gd").new()
 	tree.root.add_child(_stub)
 	_screen = GameScreen.new()
@@ -24,9 +24,10 @@ func _open(level: int) -> void:
 	await tree.process_frame
 	await tree.process_frame
 	# dismiss any intro card so taps reach the board
-	for ch in _screen.get_children():
-		if ch is Modal:
-			ch.close()
+	if dismiss_dialogs:
+		for ch in _screen.get_children():
+			if ch is Modal:
+				ch.close()
 	await tree.process_frame
 
 
@@ -146,4 +147,93 @@ func test_restart_asks_for_confirmation_only_with_progress() -> void:
 			dialogs += 1
 	eq(dialogs, before + 1, "confirmation dialog shown")
 	eq(_screen.session.board.moves, 1, "nothing lost until confirmed")
+	await _close()
+
+
+func test_modal_button_callback_runs_once_on_double_press() -> void:
+	await _open(1)
+	var count := [0]
+	var m := Modal.make("t")
+	var b := m.add_button("Go", "primary", func(): count[0] += 1)
+	_screen.add_child(m)
+	await tree.process_frame
+	b.pressed.emit()
+	b.pressed.emit()          # second tap lands before the dialog is freed
+	eq(count[0], 1, "callback executed once")
+	await _close()
+
+
+func test_double_tapping_undo_in_fail_dialog_undoes_only_one_move() -> void:
+	await _open(11)
+	# play until the move limit is reached (always a legal random-ish move)
+	var guard := 0
+	while _screen.session.status == GameSession.Status.PLAYING and guard < 80:
+		guard += 1
+		await _wait_idle()
+		var lm: Array = _screen.session.board.legal_moves()
+		if lm.is_empty():
+			break
+		var mv: Array = lm[guard % lm.size()]
+		_screen._on_tray_tapped(mv[0])
+		_screen._on_tray_tapped(mv[1])
+	await _wait_idle()
+	await tree.process_frame
+	await tree.process_frame
+	eq(_screen.session.status, GameSession.Status.FAILED)
+	var moves_at_fail: int = _screen.session.board.moves
+	var fail_modal: Modal = null
+	for ch in _screen.get_children():
+		if ch is Modal:
+			fail_modal = ch
+	check(fail_modal != null, "failure dialog shown")
+	var undo_btn: Button = fail_modal._buttons.get_child(0)
+	undo_btn.pressed.emit()
+	undo_btn.pressed.emit()
+	await _wait_idle()
+	eq(_screen.session.board.moves, moves_at_fail - 1, "exactly one move undone")
+	await _close()
+
+
+func test_restored_failed_session_shows_failure_dialog() -> void:
+	var lv: Dictionary = Levels.get_level(11)
+	var s := GameSession.new(lv)
+	var guard := 0
+	while s.status == GameSession.Status.PLAYING and guard < 80:
+		guard += 1
+		var lm: Array = s.board.legal_moves()
+		if lm.is_empty():
+			break
+		var mv: Array = lm[guard % lm.size()]
+		s.try_move(mv[0], mv[1])
+	eq(s.status, GameSession.Status.FAILED)
+	Progress.session = s.to_dict()    # e.g. app killed on the failure screen
+	await _open(11, false)
+	await tree.process_frame
+	var found := false
+	for ch in _screen.get_children():
+		if ch is Modal:
+			found = true
+	check(found, "failure dialog offered after restoring a failed session")
+	await _close()
+
+
+func test_rapid_shakes_and_selection_never_leave_things_off_grid() -> void:
+	await _open(1)
+	var bv := _screen.board_view
+	for k in 6:
+		bv.shake(0)
+		bv.shake(1)
+		await tree.process_frame
+	bv.select(1)
+	bv.deselect()
+	bv.select(1)
+	bv.shake(2)
+	bv.deselect()
+	for k in 40:
+		await tree.process_frame
+	check(bv.settled())
+	for i in bv.trays.size():
+		check(absf(bv.trays[i].position.x - bv._tray_base_x[i]) < 0.01, "tray %d back on its column" % i)
+		for j in bv.objs[i].size():
+			check((bv.objs[i][j] as ObjectView).position.distance_to(bv._slot_pos(i, j)) < 0.5, "object %d/%d on its slot" % [i, j])
 	await _close()

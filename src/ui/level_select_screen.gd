@@ -69,8 +69,13 @@ func _ready() -> void:
 
 	_toast = UI.label("", UI.FONT_BODY, Color.WHITE)
 	_toast.add_theme_stylebox_override("normal", UI.box(Color(UI.INK, 0.92), 28))
-	_toast.custom_minimum_size = Vector2(520, 64)
-	_toast.position = Vector2(100, 1120)
+	_toast.anchor_left = 0.1
+	_toast.anchor_right = 0.9
+	_toast.anchor_top = 1.0
+	_toast.anchor_bottom = 1.0
+	_toast.offset_top = -120
+	_toast.offset_bottom = -50
+	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast.modulate.a = 0.0
 	_toast.z_index = 20
 	add_child(_toast)

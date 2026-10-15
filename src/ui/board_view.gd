@@ -15,6 +15,9 @@ var busy := false:
 	set(v):
 		if busy != v:
 			busy = v
+			if not v and _relayout_pending:
+				_relayout_pending = false
+				rebuild(false)
 			busy_changed.emit(v)
 var reduce_motion := false
 var selected_tray := -1
@@ -24,6 +27,8 @@ var _hint_tween: Tween
 var _slot := 80.0
 var _lift := 56.0
 var _layer: Control  # objects live above trays so they can travel across
+var _tray_base_x: Array = []  # canonical x of each tray (shake always returns here)
+var _relayout_pending := false
 
 
 func _ready() -> void:
@@ -37,8 +42,11 @@ func setup(s: GameSession) -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_RESIZED and session != null and not busy:
-		rebuild(false)
+	if what == NOTIFICATION_RESIZED and session != null:
+		if busy:
+			_relayout_pending = true  # applied as soon as the animation ends
+		else:
+			rebuild(false)
 
 
 # ---------------------------------------------------------------- layout
@@ -76,6 +84,7 @@ func rebuild(animate: bool) -> void:
 	var lay := _compute_layout()
 	_slot = lay["slot"]
 	_lift = _slot * 0.7
+	_tray_base_x.clear()
 	var rows: int = lay["rows"]
 	var cols: int = lay["cols"]
 	var row_h: float = (lay["maxcap"] + 0.3) * _slot
@@ -89,6 +98,7 @@ func rebuild(animate: bool) -> void:
 		var in_row: int = mini(cols, b.tray_count() - r * cols)
 		var x_off: float = (cols - in_row) * lay["cell_w"] / 2.0
 		tv.position = Vector2(x_off + c * lay["cell_w"], y0 + r * (row_h + lay["gap"]) + (row_h - tv.size.y))
+		_tray_base_x.append(tv.position.x)
 		tv.tapped.connect(func(idx): tray_tapped.emit(idx))
 		add_child(tv)
 		trays.append(tv)
@@ -122,12 +132,12 @@ func rebuild(animate: bool) -> void:
 ## Top-left position of the object view for slot j of tray i.
 func _slot_pos(i: int, j: int) -> Vector2:
 	var tv := trays[i]
-	return tv.position + tv.slot_center(j) - Vector2(_slot, _slot) / 2.0
+	return Vector2(_tray_base_x[i], tv.position.y) + tv.slot_center(j) - Vector2(_slot, _slot) / 2.0
 
 
 func _lift_pos(i: int) -> Vector2:
 	var tv := trays[i]
-	return tv.position + Vector2(tv.size.x / 2.0 - _slot / 2.0, -_slot * 0.95)
+	return Vector2(_tray_base_x[i], tv.position.y) + Vector2(tv.size.x / 2.0 - _slot / 2.0, -_slot * 0.95)
 
 
 # ---------------------------------------------------------------- state mirroring
@@ -170,11 +180,46 @@ func deselect() -> void:
 	refresh()
 
 
+## Every node has at most ONE running position tween. Starting a new one kills
+## the old, so overlapping select/deselect/shake/move can never leave a node
+## stranded at an in-between position.
+func _kill_pos_tween(node: Control) -> void:
+	if node.has_meta("pos_tween"):
+		var old = node.get_meta("pos_tween")
+		if old is Tween and (old as Tween).is_valid():
+			(old as Tween).kill()
+		node.remove_meta("pos_tween")
+
+
+func _pos_tween(node: Control) -> Tween:
+	_kill_pos_tween(node)
+	var tw := node.create_tween()
+	node.set_meta("pos_tween", tw)
+	return tw
+
+
 func _tween_to(node: Control, pos: Vector2, dur: float) -> void:
 	if reduce_motion:
+		_kill_pos_tween(node)
 		node.position = pos
 		return
-	create_tween().tween_property(node, "position", pos, dur).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_pos_tween(node).tween_property(node, "position", pos, dur).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
+## True when no move/shake/lift tween is still running on any tray or object.
+func settled() -> bool:
+	if busy:
+		return false
+	var nodes: Array = []
+	nodes.append_array(trays)
+	for list in objs:
+		nodes.append_array(list)
+	for n in nodes:
+		if n.has_meta("pos_tween"):
+			var tw = n.get_meta("pos_tween")
+			if tw is Tween and (tw as Tween).is_valid() and (tw as Tween).is_running():
+				return false
+	return true
 
 
 # ---------------------------------------------------------------- animations
@@ -189,6 +234,7 @@ func animate_move(result: Dictionary) -> void:
 	if src_list.is_empty():
 		rebuild(false)  # drifted: recover from the authoritative model
 		return
+	refresh()  # selection is over: drop destination highlights immediately
 	var ov: ObjectView = src_list.pop_back()
 	var dst_list: Array = objs[to]
 	var landing := _slot_pos(to, dst_list.size())
@@ -197,10 +243,10 @@ func animate_move(result: Dictionary) -> void:
 	ov.z_index = 5
 	var cleared: bool = result["cleared"]
 	if reduce_motion:
-		ov.position = landing
+		_tween_to(ov, landing, 0.0)
 		_finish_move(ov, to, cleared)
 		return
-	var tw := create_tween()
+	var tw := _pos_tween(ov)
 	tw.tween_property(ov, "position", _lift_pos(from), 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(ov, "position", _lift_pos(to), 0.13).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 	tw.tween_property(ov, "position", landing, 0.10).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
@@ -240,19 +286,17 @@ func shake(tray: int) -> void:
 	if reduce_motion or tray < 0 or tray >= trays.size():
 		return
 	var tv := trays[tray]
-	var list: Array = objs[tray]
-	var base := tv.position.x
-	var tw := create_tween()
+	var base_x: float = _tray_base_x[tray]
+	var tw := _pos_tween(tv)
 	for d in [8.0, -8.0, 5.0, -5.0, 0.0]:
-		tw.tween_property(tv, "position:x", base + d, 0.04)
-	var top: ObjectView = null
-	if not list.is_empty():
-		top = list[list.size() - 1]
-	if top != null and selected_tray != tray:
-		var bx := top.position.x
-		var tw2 := create_tween()
+		tw.tween_property(tv, "position:x", base_x + d, 0.04)
+	var list: Array = objs[tray]
+	if not list.is_empty() and selected_tray != tray:
+		var top: ObjectView = list[list.size() - 1]
+		var base := _slot_pos(tray, list.size() - 1)
+		var tw2 := _pos_tween(top)
 		for d in [8.0, -8.0, 5.0, -5.0, 0.0]:
-			tw2.tween_property(top, "position:x", bx + d, 0.04)
+			tw2.tween_property(top, "position", base + Vector2(d, 0), 0.04)
 
 
 # ---------------------------------------------------------------- hint

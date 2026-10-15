@@ -77,6 +77,8 @@ func add_text(text: String, color: Color = UI.INK, size: int = UI.FONT_BODY) -> 
 func add_button(text: String, kind: String = "primary", callback: Callable = Callable(), close_after: bool = true) -> Button:
 	var b := UI.button(text, kind)
 	b.pressed.connect(func():
+		if _done:
+			return  # a second tap before the dialog is freed must not re-run the action
 		Audio.play("tap")
 		if close_after:
 			close()
