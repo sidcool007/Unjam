@@ -123,12 +123,16 @@ static func button(text: String, kind: String = "primary", font_size: int = FONT
 static func safe_insets(vp: Viewport) -> Vector4:  # left, top, right, bottom
 	if not (OS.has_feature("android") or OS.has_feature("ios")):
 		return Vector4.ZERO
-	var win := Vector2(DisplayServer.window_get_size())
-	if win.x <= 0.0 or win.y <= 0.0:
+	return insets_from_rects(Rect2(DisplayServer.get_display_safe_area()),
+		Vector2(DisplayServer.window_get_size()), vp.get_visible_rect().size)
+
+
+## Pure maths behind safe_insets (unit-tested): `safe` is the safe rectangle in
+## window pixels, `win` the window size in pixels, `vp` the logical viewport size.
+static func insets_from_rects(safe: Rect2, win: Vector2, vp: Vector2) -> Vector4:
+	if win.x <= 0.0 or win.y <= 0.0 or safe.size.x <= 0.0 or safe.size.y <= 0.0:
 		return Vector4.ZERO
-	var safe := DisplayServer.get_display_safe_area()
-	var vs := vp.get_visible_rect().size
-	var sx := vs.x / win.x
-	var sy := vs.y / win.y
+	var sx := vp.x / win.x
+	var sy := vp.y / win.y
 	return Vector4(safe.position.x * sx, safe.position.y * sy,
 		(win.x - safe.end.x) * sx, (win.y - safe.end.y) * sy).max(Vector4.ZERO)
