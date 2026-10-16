@@ -46,6 +46,7 @@
 | `tools/` | `generate_levels.gd`, `level_specs.gd`, `validate_levels.gd`, `make_icons.gd` (dev only) |
 | `tests/` | Headless test runner + `test_*.gd` |
 | `export_presets.cfg` | "Android Debug" and "Android Release (AAB)" presets |
+| `SSOT.md` (this file) | Single source of truth |
 | `docs/` | Detail docs (index in §10) |
 
 ## 4. How to verify (reproducible commands)
@@ -62,7 +63,7 @@ Ubuntu packages in a minimal SDK folder (see `docs/ANDROID.md`). Also green on G
 
 ## 5. Canonical game facts (constants — must equal the code)
 
-Rules are specified in full in [`RULES.md`](RULES.md). Key facts duplicated here for lookup only:
+Rules are specified in full in [`docs/RULES.md`](docs/RULES.md). Key facts duplicated here for lookup only:
 
 * **Move:** one object per move, from the **top** of a tray; destination must be non-full, not `source_only`,
   satisfy `accepts` (if set), and be empty **or** have a top of the **same type**. Top object must not be
@@ -75,7 +76,7 @@ Rules are specified in full in [`RULES.md`](RULES.md). Key facts duplicated here
   **15 + 5 × stars** · replays pay **0** · stars: ≤ 125 % of par → 3, ≤ 175 % → 2, else 1 (par = shortest solution).
 * **Levels:** 40; stages 1 Basics (1–4), 2 Tight trays (5–10), 3 Move limits (11–14), 4 Locks (15–20),
   5 Reserved/one-way trays (21–26), 6 Ice (27–32), 7 Mastery (33–40). Move limit = par + max(spec slack, 45 % of par).
-* **Save:** `user://unjam_save.json` (+ `.bak`), `version: 1` — [`SAVE_FORMAT.md`](SAVE_FORMAT.md).
+* **Save:** `user://unjam_save.json` (+ `.bak`), `version: 1` — [`SAVE_FORMAT.md`](docs/SAVE_FORMAT.md).
 * **UI:** logical viewport 720×1280, stretch `canvas_items`, aspect `expand`; minimum touch target 96 logical px
   (= 48 dp on a 360 dp phone); Android back button handled (dialog → pause → previous screen → exit).
 
@@ -85,15 +86,15 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 
 | § | Requirement | Status | Evidence / note |
 |---|-------------|:--:|----------------|
-| 2 | Inspect environment first; preserve existing work | ✅ | Repo was empty; toolchain verified and documented (`ANDROID.md`) |
+| 2 | Inspect environment first; preserve existing work | ✅ | Repo was empty; toolchain verified and documented (`docs/ANDROID.md`) |
 | 3 | Godot 4 / GDScript / Android portrait / local save / JSON levels / no paid or network deps | ✅ | `project.godot`; manifest has 0 permissions |
 | 3 | Monetisation modular, no live ads/IAP | ✅ | `RewardedAdProvider` interface only; `test_services` |
 | 4–5.1 | Board of trays/objects, distinct shapes+colours, blocked objects not movable | ✅ | `BoardState`, `Shapes`; fuzz proves blocked objects never pickable |
-| 5.2 | One canonical move rule, documented before content | ✅ | `RULES.md`; single implementation; legal-move enumeration = `check_move` (fuzz) |
+| 5.2 | One canonical move rule, documented before content | ✅ | `docs/RULES.md`; single implementation; legal-move enumeration = `check_move` (fuzz) |
 | 5.3 | Move limits, failure state, restart (+confirm), exact undo, victory, input lock during animation | ✅ | `test_board_rules`, `test_fuzz`, `test_ui_flow`, `test_ui_fuzz` |
 | 5.4 | Mechanics introduced gradually, each in a safe level first | ✅ | `test_campaign` (debut order + intro card on each debut level) |
 | 6 | Data-driven levels, persistent progress, replayable, locked levels distinct, level select, number/moves shown | ✅ | `campaign.json`, `LevelSelectScreen`, HUD |
-| 6 | **30–50 levels, every one with a verified solution** | ✅ | 40 levels; exhaustive BFS proof per level (`validation_report.txt`) |
+| 6 | **30–50 levels, every one with a verified solution** | ✅ | 40 levels; exhaustive BFS proof per level (`docs/validation_report.txt`) |
 | 6 | Validator: counts, impossible states, capacity, reachability, duplicates, diagnostics | ✅ | `level_validator.gd`, `validate_levels.gd`, `test_campaign` (incl. negative cases) |
 | 7 | Coins, hints cost, no negative balance, rewards exactly once | ✅ | `test_progress`, `test_ui_flow` (double win callback pays once) |
 | 8 | Hint = legal next move, no charge when none, explanation, deterministic fallback | ✅ | `HintService`; hint-following wins all 40 levels (≈80 ms worst, desktop) |
@@ -103,15 +104,15 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 | 10 | Feedback: select, move, invalid, tray clear, win, fail, coin, button; sound+music toggles; works without audio | 🟡 | All present & toggleable; coin reward has a sound and text but **no animated coin counter**; **audio never listened to**; haptics none |
 | 11 | Save: unlocks, completed, current level, coins, settings, tutorial, active session; validated; corrupt-safe; save at transitions | ✅ | `test_progress` (round trip, corruption, backup, sanitising, suspend flush, session restore) |
 | 12 | Ad architecture, no ads shipped, no double rewards, no fake rewards | ✅ | `test_services` |
-| 13 | Modular architecture, single state model, signals, no duplicated rules | ✅ | `ARCHITECTURE.md` |
+| 13 | Modular architecture, single state model, signals, no duplicated rules | ✅ | `docs/ARCHITECTURE.md` |
 | 14 | Unit/logic/level tests listed in brief | ✅ | 67 tests incl. suspend/resume, repeated taps during animation |
-| 14 | Tutorial text accurately describes actual rules | 🟡 | Texts reviewed by hand against `RULES.md`; only existence is automated |
-| 14 | **Android: run on device/emulator, test touch/audio/persistence/navigation, inspect logs** | ❌ | Impossible in this environment; manual plan in `TESTING.md` |
+| 14 | Tutorial text accurately describes actual rules | 🟡 | Texts reviewed by hand against `docs/RULES.md`; only existence is automated |
+| 14 | **Android: run on device/emulator, test touch/audio/persistence/navigation, inspect logs** | ❌ | Impossible in this environment; manual plan in `docs/TESTING.md` |
 | 15 | Lightweight, no needless permissions, no input duplication | 🟡 | Manifest: 0 permissions; duplicate input guarded & tested; **no on-device perf measurement** |
 | 16 | Documentation set | ✅ | §10 |
 | 17 | Phases 1–5 | ✅ | §7 |
 | 17 | Phase 6: app id, version, icon, orientation, export; debug APK; AAB only if possible | 🟡 | Debug APK ✅; AAB ❌ (no SDK/keystore); app id placeholder |
-| 17 | Phase 7: honest handover | ✅ | This document + README + `KNOWN_ISSUES.md` |
+| 17 | Phase 7: honest handover | ✅ | This document + README + `docs/KNOWN_ISSUES.md` |
 | 18 | Working rules (no placeholder buttons, no hidden failures, progress log) | ✅ | `PROGRESS.md`; no stubbed UI |
 | 19 | Definition of done items 1–10 | 🟡 | Items 1–8 ✅; **9 (debug build *generated and tested*) — generated yes, tested no**; 10 ✅ (blockers documented) |
 
@@ -129,7 +130,7 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 
 ## 8. Release blockers and open items (authoritative list)
 
-1. **Run on real hardware** (≥2 devices incl. a cutout device and a low-end one) using the plan in `TESTING.md`; fix what it finds.
+1. **Run on real hardware** (≥2 devices incl. a cutout device and a low-end one) using the plan in `docs/TESTING.md`; fix what it finds.
 2. **Build a release AAB**: gradle build template + full Android SDK + *your own* release keystore (never committed).
 3. **Replace the placeholder application id**; bump version fields in both presets and `project.godot` together.
 4. **Re-check Google Play's target-API floor** on the submission date (APK targets 35 today).
@@ -156,16 +157,16 @@ Known historical bug to keep in mind: packed arrays stored inside an `Array` ali
 | Topic | Owner |
 |-------|-------|
 | Overall status, requirement traceability, blockers | **this file** |
-| Rules / movement / economy details | [`RULES.md`](RULES.md) |
-| Module design and decisions | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
-| Level format, authoring, validator | [`LEVELS.md`](LEVELS.md) · data: `levels/campaign.json` · proof: [`validation_report.txt`](validation_report.txt) |
-| Save schema, versioning, recovery | [`SAVE_FORMAT.md`](SAVE_FORMAT.md) |
-| Tests, results, manual device plan | [`TESTING.md`](TESTING.md) |
-| Export / toolchain | [`ANDROID.md`](ANDROID.md) |
-| Licences / dependencies | [`ASSETS_AND_LICENSES.md`](ASSETS_AND_LICENSES.md) |
-| Limitations | [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md) |
-| Pre-publication steps | [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) |
-| Chronological log | [`../PROGRESS.md`](../PROGRESS.md) |
+| Rules / movement / economy details | [`docs/RULES.md`](docs/RULES.md) |
+| Module design and decisions | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| Level format, authoring, validator | [`LEVELS.md`](docs/LEVELS.md) · data: `levels/campaign.json` · proof: [`docs/validation_report.txt`](docs/validation_report.txt) |
+| Save schema, versioning, recovery | [`SAVE_FORMAT.md`](docs/SAVE_FORMAT.md) |
+| Tests, results, manual device plan | [`docs/TESTING.md`](docs/TESTING.md) |
+| Export / toolchain | [`docs/ANDROID.md`](docs/ANDROID.md) |
+| Licences / dependencies | [`ASSETS_AND_LICENSES.md`](docs/ASSETS_AND_LICENSES.md) |
+| Limitations | [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md) |
+| Pre-publication steps | [`RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md) |
+| Chronological log | [`../PROGRESS.md`](PROGRESS.md) |
 
 ## 11. Maintenance rules for this document
 

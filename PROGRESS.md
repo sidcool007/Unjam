@@ -27,4 +27,4 @@ Defects found by code review + randomised exploration, all fixed and covered by 
 6. Toasts used fixed pixel positions and could overlap the board on tall phones (now bottom-anchored).
 No rule-engine defects were found: 31 200 randomised actions held every invariant.
 
-2026-10-16: added docs/SSOT.md; raised minimum touch target 88→96 logical px (48 dp on a 360 dp phone).
+2026-10-16: added SSOT.md (repo root); raised minimum touch target 88→96 logical px (48 dp on a 360 dp phone).
