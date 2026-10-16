@@ -1,12 +1,12 @@
 # Unjam: The Last Slot
 
-A casual Android sorting puzzle built with **Godot 4.6 (GDScript)**. Move objects
+A casual Android sorting puzzle built with **Godot 4.7.1 (GDScript)**. Move objects
 between limited-capacity trays; only the top object moves, and you must decide
 who gets the *last free slot*. 40 original, solver-verified levels, fully offline,
 no ads, no account, **no Android permissions**.
 
-Status: release **candidate** (see `docs/KNOWN_ISSUES.md` and `docs/RELEASE_CHECKLIST.md`).
-The game has **not** been run on a physical device or emulator yet.
+Status: release **candidate** — API-36 debug APK builds; **not** yet run on a device, **no** signed release AAB (see `SSOT.md` §8,
+`docs/KNOWN_ISSUES.md`, `docs/RELEASE_CHECKLIST.md`).
 
 ## Quick start
 
@@ -38,7 +38,11 @@ introduced one at a time. Full rules: [`docs/RULES.md`](docs/RULES.md).
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | modules, data flow, design decisions |
 | [LEVELS.md](docs/LEVELS.md) | level format, authoring, generator, validator |
 | [SAVE_FORMAT.md](docs/SAVE_FORMAT.md) | save file schema, versioning, recovery |
-| [TESTING.md](docs/TESTING.md) | test commands, actual results, manual device test plan |
+| [TESTING.md](docs/TESTING.md) | test commands and actual results |
+| [DEVICE_TEST_PLAN.md](docs/DEVICE_TEST_PLAN.md) | Android device test matrix + results log (not run) |
+| [PLAYTEST_PLAN.md](docs/PLAYTEST_PLAN.md) | human playtest protocol (not run) |
+| [SIGNING.md](docs/SIGNING.md) | secure release-signing procedure (no key exists) |
+| [store/](store/) | Play listing assets, privacy-policy draft, Play Console prep |
 | [ANDROID.md](docs/ANDROID.md) | export instructions, what was and wasn't built |
 | [ASSETS_AND_LICENSES.md](docs/ASSETS_AND_LICENSES.md) | dependencies and licences |
 | [KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) | limitations, untested items |

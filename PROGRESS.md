@@ -28,3 +28,10 @@ Defects found by code review + randomised exploration, all fixed and covered by 
 No rule-engine defects were found: 31 200 randomised actions held every invariant.
 
 2026-10-16: added SSOT.md (repo root); raised minimum touch target 88→96 logical px (48 dp on a 360 dp phone).
+
+## Release hardening (2026-10-16)
+* Audit baseline reproduced; official Play rule read: target API 36 required since 2026-08-31 → APK was at 35.
+* Toolchain Godot 4.6 → 4.7.1: APK now `targetSdkVersion 36`. Tests 78/78, validator 40/40.
+* Fixed: landscape/tablet stretching (responsive column), adaptive-icon safe zone; added store assets, privacy-policy and Play Console drafts,
+  device/playtest/signing procedures, release-config guard test, tutorial-claim tests.
+* Blocked/owner: AAB (keystore + dl.google.com), device testing, application id, privacy URL, testers. See SSOT §8.
