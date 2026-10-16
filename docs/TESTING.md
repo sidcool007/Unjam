@@ -9,8 +9,8 @@ godot --headless --path . --script res://tools/validate_levels.gd # exhaustive l
 `tests/test_runner.gd` discovers `tests/test_*.gd`; each `test_*` method may `await`
 frames. UI tests drive the real `GameScreen` with taps.
 
-### Latest results (Godot 4.6.stable, this repository state; also green on 4.3)
-* **67 tests, 67 passed, 0 failed**
+### Latest results (Godot 4.7.1.stable, 2026-10-16; also green on 4.6 and 4.3)
+* **78 tests, 78 passed, 0 failed** (exit code 0)
   * `test_board_rules` (14): legal/illegal moves, match rule, full trays, clear rule,
     reserved & one-way trays, locks (unlock on clear), ice (thaw by move count), move
     limit failure, deadlock failure, exact undo, undo after failure, restart, clone independence.
@@ -34,6 +34,9 @@ frames. UI tests drive the real `GameScreen` with taps.
     vs `check_move`, blocked objects never pickable); win on the final allowed move; undo across clears/locks/ice.
   * `test_ui_fuzz` (4): random taps (also hammering during animations), undo, restart, hint and pause on 7
     levels; after every idle point the view must mirror the model exactly (objects, positions, highlights, dialogs).
+  * `test_layout` (5): safe-area/cutout arithmetic and the responsive column (SIMULATED geometry, not a device).
+  * `test_release_config` (4): identity/version consistent across presets and project, 0 permissions, no credentials in tracked config, AAB preset sane.
+  * `test_campaign` also checks that each intro card's promised mechanic really exists on the level that shows it (+2 tests).
   * `test_services` (4): ad gate grants at most once, never without a request, never faked;
     audio safe with unknown/disabled sounds.
 * **Level validator:** 40 levels, **0 errors, 0 warnings**; exhaustive BFS proved every
@@ -52,7 +55,11 @@ frames. UI tests drive the real `GameScreen` with taps.
   suspend/resume on a real OS and low-end performance are untested on hardware.
 * Human playtesting of difficulty (the ramp is verified by solver metrics only).
 
-## Manual device test procedure
+## Device testing
+See **`docs/DEVICE_TEST_PLAN.md`** (full matrix, adb commands, results table — every row currently NOT RUN) and
+**`docs/PLAYTEST_PLAN.md`** (human playtest, levels 1–10, not run).
+
+## Manual device test procedure (short form)
 1. `adb install -r build/unjam-debug.apk`; launch *Unjam*. Confirm portrait lock (rotate device).
 2. Airplane mode ON; play level 1 with the tutorial coach; confirm win dialog, +30 coins.
 3. Tap rapidly during a move: no double moves, undo disabled while animating.

@@ -153,3 +153,61 @@ func test_unsolvable_level_is_detected_by_exhaustive_search() -> void:
 	check(not LevelValidator.validate(lv, true)["errors"].is_empty())
 	var res := Solver.solve_optimal(BoardState.from_level(lv), 100000)
 	check(res["found"] or res["exhausted"])
+
+
+func test_tutorial_claims_match_the_levels_that_show_them() -> void:
+	# Each intro card promises a mechanic; the level that shows it must really contain it.
+	var needs := {
+		"limit": func(lv): return int(lv.get("max_moves", 0)) > 0,
+		"lock": func(lv): return _any_item(lv, func(it): return it is Dictionary and it.has("lock")),
+		"ice": func(lv): return _any_item(lv, func(it): return it is Dictionary and it.has("ice")),
+		"accepts": func(lv): return _any_tray(lv, func(t): return int(t.get("accepts", -1)) >= 0),
+		"source": func(lv): return _any_tray(lv, func(t): return bool(t.get("source_only", false))),
+		"capacity": func(lv): return _caps_differ(lv),
+		"mix": func(lv): return _any_item(lv, func(it): return it is Dictionary and it.has("lock")) and _any_item(lv, func(it): return it is Dictionary and it.has("ice")),
+	}
+	var seen := {}
+	for lv in lib.levels:
+		var k := str(lv.get("intro", ""))
+		if k == "" or k == "basics":
+			continue
+		seen[k] = true
+		check(needs.has(k), "intro '%s' has a content check" % k)
+		if needs.has(k):
+			check(needs[k].call(lv), "level %d shows intro '%s' but does not contain that mechanic" % [lv["id"], k])
+	for k in needs:
+		check(seen.has(k), "intro '%s' is used by some level" % k)
+
+
+func test_rule_text_mentions_every_mechanic_and_the_real_numbers() -> void:
+	var t := CampaignText.RULES_TEXT.to_lower()
+	for word in ["top object", "same shape", "empty tray", "padlock", "ice", "arrow", "move limit", "clear"]:
+		check(t.contains(word), "rules text mentions '%s'" % word)
+	# every Reason a player can hit has player-facing text (except same-tray, which just deselects)
+	for r in BoardState.Reason.values():
+		if r in [BoardState.Reason.OK, BoardState.Reason.SAME_TRAY]:
+			continue
+		check(CampaignText.reason_text(r) != "That move isn't allowed.", "reason %d has specific text" % r)
+
+
+func _any_item(lv: Dictionary, f: Callable) -> bool:
+	for t in lv["trays"]:
+		for it in t["items"]:
+			if f.call(it):
+				return true
+	return false
+
+
+func _any_tray(lv: Dictionary, f: Callable) -> bool:
+	for t in lv["trays"]:
+		if f.call(t):
+			return true
+	return false
+
+
+func _caps_differ(lv: Dictionary) -> bool:
+	var first := int(lv["trays"][0]["cap"])
+	for t in lv["trays"]:
+		if int(t["cap"]) != first:
+			return true
+	return false

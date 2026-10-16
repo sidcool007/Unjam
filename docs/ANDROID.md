@@ -1,44 +1,53 @@
-# Android export
+# Android build and export
 
-## Requirements
-* Godot **4.6-stable** editor + matching **export templates** (`4.6.stable`).
-* JDK 17+ (21 used here), Android SDK with `platform-tools`, `build-tools` (apksigner, zipalign)
-  and `cmdline-tools`; set paths in *Editor Settings → Export → Android*.
-* A debug keystore (`keytool -genkeypair -keystore debug.keystore -alias androiddebugkey
-  -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android`).
-  **Never commit keystores** (`.gitignore` excludes `*.keystore`/`*.jks`).
+## Verified toolchain (2026-10-16)
+| Component | Version | Notes |
+|-----------|---------|-------|
+| Godot editor | **4.7.1.stable** (`a13da4feb`) | `/opt/godot471`, symlinked as `godot` |
+| Export templates | **4.7.1.stable** | prebuilt APK templates are compiled with **compileSdk 36 / targetSdk 36** (checked with `aapt dump badging` on `android_release.apk`) |
+| JDK | OpenJDK 21.0.12 | Godot's gradle template needs ≥17 |
+| Gradle | 8.14.3 installed; project wrapper downloads 8.11.1 | |
+| `adb` / `aapt` / `aapt2` / `apksigner` / `zipalign` | Ubuntu packages (platform-tools 34.0.4 / apksigner 31.0.2 / zipalign 10.0.0) | in a minimal SDK folder of symlinks, `/opt/android-sdk` (see below) |
+| Android SDK platforms | **only `android-34` stub folder** | **no real platform-36 / build-tools-36.1.0** (see blockers) |
+| Emulator / device | **none** (`adb devices` empty, no `/dev/kvm`) | |
+| Older templates kept | 4.3.stable, 4.6.stable | 4.6 templates target API 35 — do not use for release |
 
-## Debug APK (what this repo builds today)
+## Play target-API requirement
+Official page <https://developer.android.com/google/play/requirements/target-sdk> (read 2026-10-16): from **31 Aug 2026**
+new apps and app updates must target **Android 16 (API 36)** or higher. The earlier API-35 APK therefore did **not** meet it.
+Fix applied: toolchain moved from Godot 4.6 (template target 35) to **4.7.1** (template target 36), no other upgrade.
+**Evidence:** `aapt dump badging build/unjam-debug.apk` → `targetSdkVersion:'36'`, `compileSdkVersion='36'`, `sdkVersion:'24'`,
+`uses-permission` count 0, native-code `arm64-v8a x86_64`, APK Signature Scheme v2 and v3 verify.
+API-36 behaviour to remember: on screens ≥600 dp (tablets/foldables) Android ignores the portrait lock, so the UI uses a
+centred, resize-aware column (`src/ui/column_margin.gd`) — covered by `tests/test_layout.gd`, **not yet seen on a real tablet**.
+
+## Debug APK (what exists today)
 ```bash
 godot --headless --path . --import
 godot --headless --path . --export-debug "Android Debug" build/unjam-debug.apk
+aapt dump badging build/unjam-debug.apk | grep -E "package:|targetSdk|uses-permission"
+apksigner verify --verbose build/unjam-debug.apk
 ```
-Preset "Android Debug" (`export_presets.cfg`): application id `com.unjam.thelastslot`
-(**placeholder – change to an id you own before publishing**), version 0.1.0 / code 1,
-portrait, ABIs arm64-v8a + x86_64, no gradle, **all permissions off** (verified with
-`aapt dump badging`: no `uses-permission` entries), backup disabled.
-Icons: `assets/icon*.svg` → PNGs via `tools/make_icons.gd`.
+Preset "Android Debug": no gradle, ABIs arm64-v8a + x86_64, all permissions off, backup off, version `0.1.0` / code `1`,
+application id `com.unjam.thelastslot` (**placeholder**, see `store/PLAY_CONSOLE_PREP.md`). Signed with the standard
+**Android debug key** (a throw-away key outside the repo, `CN=Android Debug`) — for testing only, never for release.
+Latest artifact: `build/unjam-debug.apk`, 57 133 192 bytes (git-ignored; regenerate with the command above).
+`docs/`, `tests/`, `tools/`, `store/`, `*.md` are excluded from the export.
 
-### Result in this environment
-`build/unjam-debug.apk` (~55 MB: two native ABIs + debug template) was exported,
-zip-aligned and signed with a *debug* key. It is not committed (`*.apk` is ignored).
-Install: `adb install -r build/unjam-debug.apk`.
+## Release AAB — status: BLOCKED (not built)
+Attempted in a scratch copy with the real gradle export preset ("Android Release (AAB)", `android/build` template from
+`android_source.zip`, `android/.build_version` = `4.7.1.stable`). Observed, in order:
+1. Without a keystore: `ERROR: Code Signing: Could not find release keystore, unable to export.` → **owner must create the upload key** (`docs/SIGNING.md`).
+2. With a clearly-labelled throw-away test keystore (deleted afterwards, never a release key): Gradle 8.11.1 downloaded fine, then
+   `Plugin [id: 'com.android.application', version: '8.6.1'] was not found` — Google's Maven (`dl.google.com`) answers
+   **403 (egress policy denial)**. The same host serves the Android SDK platforms/build-tools, so **no gradle/AAB build can
+   succeed in this environment**.
+Remedy (owner): in the Claude Code environment settings add `dl.google.com` to *Allowed domains* (keep "Allow package managers"
+ticked), or build the AAB on a normal workstation / CI with Android Studio's SDK. Then install `platforms;android-36`,
+`build-tools;36.1.0`, NDK not needed for non-custom builds, accept licences, run the command in `docs/SIGNING.md`, and verify with
+`bundletool`/`jarsigner`. Do **not** call any unsigned bundle or the debug APK a production release.
 
-How the toolchain was assembled here (Google's `dl.google.com` was blocked): Godot,
-templates from GitHub releases; `apksigner`, `zipalign`, `adb`, `aapt` from Ubuntu
-packages; a minimal SDK folder (`/opt/android-sdk/{platform-tools,build-tools/34.0.0,
-cmdline-tools/latest/bin}`) of symlinks plus a stub `sdkmanager`. This is enough for
-the non-gradle export only.
-
-## Release AAB (NOT produced)
-Needs: the gradle build template installed from the editor (*Project → Install Android
-Build Template*), a full Android SDK (platform + build tools; not downloadable here), and
-your own **release keystore**. Then use preset "Android Release (AAB)" (gradle,
-AAB format, arm64 + armv7), set `keystore/release*` via environment variables
-(`GODOT_ANDROID_KEYSTORE_RELEASE_PATH/_USER/_PASSWORD`) — never in the repo.
-No signing key was created and nothing was published.
-
-## Play Store target API
-Godot 4.6 templates target Android API 35 (verified with `aapt dump badging`; min SDK 24).
-Google Play raises its target-API floor every year: **check the current requirement on the
-day you submit** and move to a newer Godot if it is above 35.
+## How the minimal SDK folder was built (debug export only)
+`/opt/android-sdk/{platform-tools/adb → /usr/bin/adb, build-tools/34.0.0/{apksigner,zipalign} → /usr/bin, cmdline-tools/latest/bin/sdkmanager (stub), platforms/android-34/ (empty)}`
+and `~/.config/godot/editor_settings-4.7.tres` (`export/android/android_sdk_path`, `java_sdk_path`, `debug_keystore*`).
+Godot prints "Could not find version of build tools that matches Target SDK, using 34.0.0" — harmless for the non-gradle export.

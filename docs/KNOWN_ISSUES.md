@@ -1,24 +1,26 @@
-# Known issues and limitations
+# Known issues, limitations and unverified items (2026-10-16)
 
-**Release blockers / unverified**
-1. **Never run on a device or emulator.** See TESTING.md for the manual plan.
-2. **Target API:** the project builds with Godot 4.6 (targets API 35). Confirm Play's current
-   requirement at submission time. No AAB was built; no release signing key exists (by design).
-3. Application id `com.unjam.thelastslot` is a placeholder.
-4. Audio unverified by ear; levels unverified by human playtesters (difficulty and the
-   45 % move-limit slack are judgement calls backed by solver numbers only).
+## Blocking a store release
+1. **No device/emulator testing has ever been performed** → `docs/DEVICE_TEST_PLAN.md` (all rows NOT RUN).
+2. **No release AAB, no release keystore** → network denial for `dl.google.com` + owner-created upload key (`docs/ANDROID.md`, `docs/SIGNING.md`).
+3. **Application ID is a placeholder**; Play Console registration unknown → owner decision (`store/PLAY_CONSOLE_PREP.md`).
+4. **Privacy-policy URL does not exist yet**; owner/contact fields are blank placeholders (`store/PRIVACY_POLICY.md`).
+5. **Play account type / closed-testing obligation unknown**; official support pages unreachable here → confirm in Play Console.
 
-**Design limitations**
-* Dead-end positions (legal moves exist but the level can't be won) are not announced
-  automatically; the Hint button detects them (free) and offers Undo/Restart.
-* A hint is a *good next move*, not necessarily the shortest plan.
-* Hint search is capped (40 000 nodes); on very slow phones it may pause the UI for a
-  moment (desktop worst case 82 ms). If the cap is hit it falls back to the authored
-  solution while the player is still on it, otherwise reports "no hint" without charging.
-* No TalkBack/screen-reader support or system font scaling. Non-colour cues exist (each
-  type has a unique shape; capacity is drawn as slots; locks show the key shape; ice shows
-  a number), plus a reduce-motion setting.
-* Portrait phones only; tablets/landscape are letterboxed/untested.
-* Replays pay no coins, so coins are finite (≈ 40 levels × ≤30 + 30 start ≈ 1 200 total).
-* Rewarded ads are an interface only; no provider exists.
-* Debug APK is large (~55 MB) because it embeds the debug engine template.
+## Not verified by humans
+* Audio levels/quality never listened to. · Level difficulty and move-limit fairness (par + max(spec slack, 45 %)) never playtested
+  → `docs/PLAYTEST_PLAN.md` (not run; testers must be recruited).
+* Touch feel, safe-area/cutout values from a real OS, low-end performance, tablet/foldable behaviour — only simulated.
+
+## Engine/platform limits
+* **TalkBack/screen-reader support is unavailable:** Godot 4.7.1 stable contains no Android accessibility server
+  (it first appears in Godot master/4.8 dev: `platform/android` has no accessibility code at tags 4.6/4.7.1). Mitigations in place:
+  unique shape per object type, slot guides, locks show their key shape, ice shows a number, reduce-motion option, 48 dp targets.
+* Android 16 ignores the portrait lock on ≥600 dp screens; handled by a centred column, unverified on hardware.
+
+## Design limitations
+* Dead-end positions (moves exist but the level can't be won) are announced only when the player taps Hint (free).
+* A hint is a good next move, not necessarily the shortest plan; search is capped (40 000 nodes) with fallback to the authored solution.
+* No animated coin counter and no haptics (deliberately not added in this hardening phase).
+* Replays pay no coins (finite economy ≈ 1 200 coins + 30 start).
+* Debug APK ≈57 MB (debug template, two ABIs); a release AAB will be smaller per device.
