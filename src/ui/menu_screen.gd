@@ -35,6 +35,7 @@ func _ready() -> void:
 	ch.add_child(UI.label(str(Progress.coins), UI.FONT_H2))
 	top.add_child(chip)
 
+	vb.add_child(_spacer(1.0))  # on tall phones the block sits a little above centre
 	var logo := Logo.new()
 	logo.custom_minimum_size = Vector2(0, 470)
 	logo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -84,9 +85,18 @@ func _ready() -> void:
 		main.open_credits())
 	row.add_child(about)
 
+	vb.add_child(_spacer(1.8))
 	if Progress.load_status == "recovered_backup" or Progress.load_status == "reset_corrupt":
 		var warn := UI.wrap_label("Your save file could not be read. %s" % ("A backup was restored." if Progress.load_status == "recovered_backup" else "Starting fresh."), UI.FONT_SMALL, UI.ACCENT_DARK)
 		vb.add_child(warn)
+
+
+func _spacer(ratio: float) -> Control:
+	var c := Control.new()
+	c.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	c.size_flags_stretch_ratio = ratio
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return c
 
 
 func _open_settings() -> void:

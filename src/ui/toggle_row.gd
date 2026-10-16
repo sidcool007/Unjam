@@ -44,7 +44,7 @@ func _input_ev(ev: InputEvent) -> void:
 
 func _draw_track() -> void:
 	var t := _track
-	var col := UI.GOOD if on else Color("c9c3b4")
+	var col := UI.GOOD_DARK if on else UI.SWITCH_OFF
 	t.draw_style_box(UI.box(col, 26), Rect2(Vector2.ZERO, t.size))
 	var kx := t.size.x - 26.0 if on else 26.0
 	t.draw_circle(Vector2(kx, t.size.y / 2.0), 20.0, Color.WHITE)

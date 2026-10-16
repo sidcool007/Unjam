@@ -124,3 +124,85 @@ func test_every_dialog_fits_on_screen_with_its_buttons() -> void:
 	menu.queue_free()
 	stub.queue_free()
 	await tree.process_frame
+
+
+func test_rule_tags_never_collide_with_the_tray_above() -> void:
+	tree.root.size = Vector2i(720, 1280)
+	await tree.process_frame
+	Progress.save_path = "user://test_layout_save.json"
+	Progress.level_count = Levels.count()
+	Progress.reset_all()
+	Progress.tutorial_done = true
+	Progress.highest_unlocked = 40
+	Progress.seen_intros = {21: true, 24: true, 25: true, 26: true, 39: true}
+	var stub = load("res://tests/stub_main.gd").new()
+	tree.root.add_child(stub)
+	for id in [21, 22, 24, 25, 26, 39]:
+		var s := GameScreen.new()
+		s.main = stub
+		s.level_id = id
+		tree.root.add_child(s)
+		for i in 4:
+			await tree.process_frame
+		var bv := s.board_view
+		var tagged := false
+		for t in bv.trays:
+			if t.accepts >= 0 or t.source_only:
+				tagged = true
+		if tagged:
+			var slot: float = bv._slot
+			var need := slot * 0.31 * 1.1
+			for a in bv.trays:
+				for b in bv.trays:
+					if a != b and absf(a.position.x - b.position.x) < 1.0 and b.position.y > a.position.y:
+						var gap := b.position.y - (a.position.y + a.size.y)
+						check(gap >= need, "level %d: gap %.1f between stacked trays must fit a %.1f tag" % [id, gap, need])
+		s.queue_free()
+		await tree.process_frame
+	stub.queue_free()
+
+
+func test_board_and_controls_fit_short_standard_and_tall_phones() -> void:
+	Progress.save_path = "user://test_layout_save.json"
+	Progress.level_count = Levels.count()
+	Progress.reset_all()
+	Progress.tutorial_done = true
+	Progress.highest_unlocked = 40
+	Progress.seen_intros = {1: true, 24: true, 40: true, 11: true}
+	var stub = load("res://tests/stub_main.gd").new()
+	tree.root.add_child(stub)
+	# 5:3 small phone, 16:9, 20:9, 21:9 folded/cover screen
+	for win in [Vector2i(480, 800), Vector2i(720, 1280), Vector2i(1080, 2400), Vector2i(1080, 2520)]:
+		tree.root.size = win
+		await tree.process_frame
+		await tree.process_frame
+		var vp := tree.root.get_visible_rect().size
+		for id in [1, 24, 40]:
+			var s := GameScreen.new()
+			s.main = stub
+			s.level_id = id
+			tree.root.add_child(s)
+			for i in 4:
+				await tree.process_frame
+			var what := "%s level %d" % [str(win), id]
+			_screen_rect_ok(s.board_view, vp, what + " board")
+			for b in [s._undo_btn, s._hint_btn, s._restart_btn]:
+				_screen_rect_ok(b, vp, what + " action button")
+				check(b.size.x >= 96.0 and b.size.y >= 96.0, what + " action button is at least 96 logical px")
+			var bv := s.board_view
+			for t in bv.trays:
+				var r := Rect2(t.position + bv.global_position, t.size)
+				check(bv.get_global_rect().grow(2.0).encloses(r), what + " tray inside the board area")
+			# no two trays overlap
+			for i in bv.trays.size():
+				for j in range(i + 1, bv.trays.size()):
+					var a: Rect2 = bv.trays[i].tray_rect()
+					a.position += bv.trays[i].position
+					var b2: Rect2 = bv.trays[j].tray_rect()
+					b2.position += bv.trays[j].position
+					check(not a.intersects(b2), what + " trays %d and %d overlap" % [i, j])
+			s.queue_free()
+			await tree.process_frame
+	tree.root.size = Vector2i(720, 1280)
+	stub.queue_free()
+	await tree.process_frame

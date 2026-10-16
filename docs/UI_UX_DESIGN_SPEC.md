@@ -1,6 +1,6 @@
 # UNJAM: THE LAST SLOT — UI / UX / Design Specification (current state)
 
-*Version of the game described: 0.1.0 (release candidate) · Godot 4.7.1 · generated 2026-10-16 from the real code and real renders.*
+*Version of the game described: 0.1.0 (release candidate) · Godot 4.7.1 · **revision 2 (2026-10-16): updated after the UI/UX improvement pass** (contrast tokens, tray rule tags, status pills, action-bar order, reward animation). Screens in `docs/design/` were re-rendered from the updated game.*
 *Purpose: hand this file (plus the images in `docs/design/`) to a design reviewer — human or AI — and ask what should change.
 Everything here describes **what exists today**, with exact values taken from the source; nothing is aspirational.
 Section 13 lists weaknesses I measured or noticed, and Section 14 is a ready-to-paste review request.*
@@ -67,20 +67,22 @@ fonts/antialiasing may differ slightly from a device. Regenerate with `tools/mak
 | `BG_DARK` | `#E7E2D8` | pressed state of secondary/icon buttons |
 | `PANEL` | `#FFFFFF` | cards, dialogs, chips, secondary buttons, level tiles |
 | `TRAY` | `#E1DCCF` | tray body, progress-bar track |
-| `TRAY_EDGE` | `#CFC8B7` | tray outline, chip/button outlines, slot guide rings |
+| `TRAY_EDGE` | `#9C9482` | tray outline (2.65:1 on BG), chip/button outlines; slot guide rings use it at 42 % |
 | `INK` | `#2B2F4A` | primary text, icons, dashed "last slot" ring, toast background, padlock |
-| `INK_SOFT` | `#6B6F8A` | secondary text (level name, captions, stage headers, stats) |
-| `ACCENT` | `#FF6B5B` | primary button fill, selection ring, current-level tile border, progress fill |
-| `ACCENT_DARK` | `#E24F3F` | primary button pressed, "THE LAST SLOT" tagline, warnings text |
-| `GOOD` | `#2FBF71` | valid-destination highlight, tray-clear flash, switch ON |
+| `INK_SOFT` | `#5A5E7A` | secondary text (level name, captions, stage headers, stats) — 5.57:1 on BG |
+| `ACCENT` | `#D2432F` | primary button fill (white text 4.58:1), selection ring, current-level tile border, progress fill |
+| `ACCENT_DARK` | `#A82F21` | primary button pressed, "THE LAST SLOT" tagline (5.97:1), warning text |
+| `GOOD` | `#2FBF71` | valid-destination highlight and tray-clear flash only (never behind text) |
+| `GOOD_DARK` | `#178348` | switch ON track (white label 4.80:1) |
+| `SWITCH_OFF` | `#756E5D` | switch OFF track (white label 4.9:1) |
 | `WARN` | `#F4B400` | hint highlight border, coin, stars, hint cost badge |
 | `ICE` | `#BFE6FA` | frozen overlay (with `#7CC3E8` rim and `#4AA3D6` snowflake) |
-| Danger button | `#D94A4A` / pressed `#B83A3A` | destructive confirmations ("Restart", "Erase everything") |
+| Danger button | `DANGER #C23A3A` / pressed `#A02E2E` | destructive confirmations ("Restart", "Erase everything"); white text 5.30:1 |
 | Chip alert fills | `#FFD9D3` (≤ 3 moves left) · `#FFE9A8` (last slot) | HUD chips |
 | Dim behind dialogs | `#1A1C33` @ 55 % | modal scrim |
-| Locked tile | fill `#DCD6C7`, number `#9A947F` | locked level tiles |
+| Locked tile | fill `#DCD6C7`, number `#7D7863` | locked level tiles (number 3.06:1) |
 
-### 4.2 Object palette (8 types: colour + shape; each has a darker rim 28 % and light sheen)
+### 4.2 Object palette (8 types: colour + shape; each has a darker rim 36 % and light sheen)
 
 | Type | Colour | Shape |
 |------|--------|-------|
@@ -140,7 +142,7 @@ Star (filled gold / empty `#D8D2C4`) · Padlock (with the **key shape inside**) 
 | Hint | source object pulses 1.0↔1.15 (0.4 s each, looping) until the next tap; both trays get a yellow outline |
 | Dialog open | card scales 0.92→1 (back-out 0.16) with fade 0.12 |
 | Screen change | cross-fade through the background colour, 0.14 s out + 0.14 s in |
-| Toast | appears instantly, holds 1.9 s, fades 0.3 s |
+| Toast | appears instantly, holds 1.2 s + 0.05 s per character (min 1.9 s, max 4.5 s), fades 0.3 s |
 
 ### 4.7 Audio (all synthesised in code; SFX at −6 dB, music at −16 dB; toggles for each)
 
@@ -174,8 +176,9 @@ Star (filled gold / empty `#D8D2C4`) · Padlock (with the **key shape inside**) 
 | **Toast** | dark-ink pill, white 28 px text, bottom-anchored just above the action bar (game) / list bottom (level select) |
 | **Level tile** | 150 × 146, number 44 px, three small stars under it (gold = earned); **current** level has a 5 px coral border; **locked** tile is a darker beige with a padlock instead of stars and a grey number |
 | **Tray** | vertical rounded container: width = 1.3 × slot, height = capacity × slot + 0.3 × slot; one faint **slot ring** per capacity slot (a non-colour capacity cue); objects stack bottom-up; tap area = the full column cell |
-| **Object** | circle/shape of radius 0.40 × slot with rim, sheen dot and ground shadow; **locked** = 55 % alpha + white disc badge (padlock showing the key shape) at bottom-right; **frozen** = pale-blue overlay + snowflake + remaining-moves number; **selected** = white disc + 5-px coral ring |
-| **Slot size** | computed to fit: `clamp(min(height-fit, width-fit), 36, 112)` logical px; the tray grid is 1 row for ≤ 4 trays (level 1), 3 columns × 2 rows for 5–6 trays, 4 columns × 2 rows for 7 trays (the largest shipped level) |
+| **Object** | circle/shape of radius 0.40 × slot with rim, sheen dot and ground shadow, always drawn at ≥ 72 % opacity so its shape stays recognisable; **locked** = 72 % opacity + a white **status pill** under it (padlock glyph + the *shape that opens it*); **frozen** = pale-blue ring + a pale-blue status pill (snowflake + moves left); **selected** = white disc + 5-px coral ring |
+| **Tray rule tag** | white 0.31 × slot badge with ink ring straddling the tray's top edge: shows the single **shape** a reserved tray accepts, or an **up-arrow** for a one-way tray. Replaces the earlier faint ghost shape / tiny triangle |
+| **Slot size** | computed to fit: `clamp(min(height-fit, width-fit), 36, 112)` logical px (row gap 40 px so tags never touch the tray above; the board sits at 58 % of the free height, slightly low, nearer the thumb); the tray grid is 1 row for ≤ 4 trays (level 1), 3 columns × 2 rows for 5–6 trays, 4 columns × 2 rows for 7 trays (the largest shipped level) |
 
 ## 6. Information architecture and navigation
 
@@ -220,7 +223,7 @@ Back button + title; one white card with left-aligned 24 px text in four blocks:
 Top bar (left→right): **Pause** (96 sq) · centre title column ("Level 15" 44 px bold over the level name 22 px soft) · **coin chip**.
 Below it two centred chips: **Moves: N** (or **Moves left: N** on limited levels; turns coral-tinted at ≤ 3) and **Free slots: N** (reads **Last slot!** with a yellow tint when exactly 1).
 Optional **coach line** (28 px, centred) only during the level-1 tutorial.
-The **board** fills the remaining space (see §5/§8). **Bottom bar:** *Undo*, *Hint (15)*, *Restart* icon buttons. A toast appears just above the bottom bar.
+The **board** fills the remaining space (see §5/§8). **Bottom bar:** **Restart, Undo, Hint (15)** icon buttons (Restart is deliberately far from Hint). A toast appears just above the bottom bar.
 
 ### 7.8 Tutorial — `09_intro_card_how_to_play.png`, `10_game_level1_initial_with_coach.png`, `11_…`
 On the very first level: a **How to play** card ("1. Tap a tray to lift its top object. 2. Tap another tray to drop it there. …") with *Let's go*.
@@ -244,10 +247,10 @@ If coins < 15: *Not enough coins* — "A hint costs 15 coins and you have N. Com
 If the position can never be finished: *This can't be finished* + explanation (free) with *Undo last move* / *Restart level* / *Close*. If no hint exists: *No hint right now* (free).
 
 ### 7.11 Mechanic levels — `20_level15_padlocks`, `21_level21_reserved_trays`, `22_level24_one_way_tray`, `23_level29_ice_frozen_objects`, `24_level40_dense_mastery`
-* **Padlock:** locked object is dimmed and wears a white badge with a padlock containing the **shape that opens it**; clearing a tray of that shape removes the lock.
-* **Reserved tray:** a faint outlined ghost of the only shape it accepts, drawn in its top slot.
-* **One-way tray:** a slightly darker tray with a small grey triangle at its top edge; objects can be taken but never dropped in.
-* **Ice:** pale-blue disc over the object with a snowflake and the number of moves left until it thaws.
+* **Padlock:** the locked object stays visible (72 % opacity) with a white pill beneath it: padlock glyph + the **shape that opens it**; clearing a tray of that shape removes the lock.
+* **Reserved tray:** a white tag badge on the tray's top edge showing the only shape it accepts.
+* **One-way tray:** a slightly darker tray with an up-arrow tag on its top edge; objects can be taken but never dropped in.
+* **Ice:** pale-blue ring around the object and a pale-blue pill (snowflake + the number of moves left until it thaws); the shape underneath stays fully visible.
 * **Move limit:** chip switches to "Moves left: N".
 
 ### 7.12 Pause — `25_pause_menu.png`
@@ -258,7 +261,7 @@ Verbatim rules text (see §10.3) with *Got it*.
 
 ### 7.14 Level complete — `28_level_complete_dialog.png`
 Non-dismissible dialog: "Level N clear!", three big stars (earned = gold, others grey; middle one larger), "Solved in 8 moves (par 8)", "+30 coins" (first completion) or "Replay: no new coins",
-buttons *Next level* (primary; replaced by a "You finished every level" line on level 40), *Play again*, *Level select*. A coin sound plays when coins are awarded; there is no coin-fly or counter animation.
+buttons *Next level* (primary; replaced by a "You finished every level" line on level 40), *Play again*, *Level select*. Stars pop in one after another (0.28 s each, 0.2 s apart) and "+N coins" counts up over 0.55 s while the coin sound plays; with **Reduce motion** the final values show immediately.
 
 ### 7.15 Level failed — `29_level_failed_dialog.png`
 Non-dismissible dialog: "Out of moves" (move limit) or "No moves left" (deadlock) with one explanatory sentence, *Undo last move* (primary; shown only if undo is possible), *Restart level*, *Level select*.
@@ -317,14 +320,14 @@ Non-dismissible dialog: "Out of moves" (move limit) or "No moves left" (deadlock
 ### 10.2 One-time intro cards (`CampaignText.INTROS`)
 | Key | Title | Body |
 |-----|-------|------|
-| `accepts` | Reserved trays | A tray with a faint outlined shape only accepts that shape. Use it to park the right objects. |
+| `accepts` | Reserved trays | A tray with a shape tag on its top edge only accepts that shape. Use it to park the right objects. |
 | `basics` | How to play | 1. Tap a tray to lift its top object.<br>2. Tap another tray to drop it there.<br><br>Objects can land on the same shape, or in an empty tray. Fill a tray with one shape to clear it. Clear every tray to win. |
 | `capacity` | Mind the free slots | Every tray has a limited number of slots. Watch the Free slots counter: when only the last slot is left, choose carefully what goes in it.<br><br>Made a mistake? Undo is free. |
 | `ice` | Ice | A frozen object can't move until enough moves have been made. The number shows how many moves remain before it thaws. |
 | `limit` | Move limits | Some levels allow only a set number of moves. The counter shows how many you have left. Undo gives moves back, so planning ahead is always allowed. |
 | `lock` | Padlocks | A padlock freezes an object in place. The shape on the padlock tells you what opens it: clear a tray of that shape and the lock disappears. |
 | `mix` | Everything together | From here on, levels mix locks, ice, reserved and one-way trays. Plan the last slot before you fill it. |
-| `source` | One-way trays | A tray marked with a small arrow only gives objects away. You can take from it but never drop into it. |
+| `source` | One-way trays | A tray with an up-arrow tag only gives objects away. You can take from it but never drop into it. |
 
 ### 10.3 Rules text ("How to play")
 > Tap a tray to lift its top object, then tap another tray to place it.
@@ -338,8 +341,8 @@ Non-dismissible dialog: "Out of moves" (move limit) or "No moves left" (deadlock
 > Special rules:
 > • Padlock: clear a tray of the shown shape to open it.
 > • Ice: wait for the shown number of moves.
-> • Outlined shape on a tray: it takes only that shape.
-> • Arrow on a tray: you can only take from it.
+> • Shape tag on a tray: it takes only that shape.
+> • Up-arrow tag on a tray: you can only take from it.
 > • Move limit: finish before the counter reaches 0.
 
 ### 10.4 Refusal reasons shown as toasts
@@ -353,9 +356,9 @@ Non-dismissible dialog: "Out of moves" (move limit) or "No moves left" (deadlock
 | `LOCKED` | Locked! Clear a tray of the shape shown on the padlock to open it. |
 | `NO_MOVES_LEFT` | No moves left. |
 | `SAME_TRAY` | *(silent — tapping the selected tray just deselects)* |
-| `SOURCE_ONLY` | This tray only gives objects away. You can't drop into it. |
+| `SOURCE_ONLY` | This tray only gives objects away (up-arrow tag). You can't drop into it. |
 | `TYPE_MISMATCH` | Objects only stack on the same shape, or in an empty tray. |
-| `WRONG_TYPE_FOR_TRAY` | This tray only takes the shape outlined inside it. |
+| `WRONG_TYPE_FOR_TRAY` | This tray only takes the shape shown on its tag. |
 
 ### 10.5 Other fixed strings
 Menu: *Play* · *Continue · Level N* · *Levels* · *Settings* · *Privacy & credits* · "N / 40 levels cleared · N stars".
@@ -371,22 +374,22 @@ Credits/privacy text is in `src/ui/credits_screen.gd`.
 **Provided:** unique shape per object type (colour is never the only cue) · capacity drawn as slot rings · locks show their key shape · ice shows a number · "Last slot!" has text, not just a colour ·
 Reduce-motion setting · 48 dp touch targets · no time pressure, no hidden gestures, no flashing > 3 Hz · sound and music optional and the game is fully playable muted · text sizes 22–44 px on a 720 px canvas (≈ 11–22 sp on a 360 dp phone).
 
-**Measured contrast (WCAG 2.x ratio; thresholds: 4.5 normal text, 3.0 large text/graphics, 1.4.11 non-text 3.0):**
+**Measured contrast (WCAG 2.x ratio; thresholds: 4.5 normal text, 3.0 large text/graphics; enforced by `tests/test_contrast.gd`):**
 
-| Pair | Ratio | Verdict |
-|------|------:|---------|
-| Ink text on background | 11.48 | pass |
-| Ink on white | 13.06 | pass |
-| Soft grey text (`INK_SOFT`) on background | **4.33** | **fails 4.5 for small text** (22 px level name, captions); passes on white (4.92) |
-| White on coral primary button | **2.80** | **fails** (even for 34 px bold large text, needs 3.0) |
-| White on pressed coral | 3.87 | passes large text |
-| White on danger red | 4.18 | passes large text |
-| Tagline coral-dark on background | 3.40 | passes large text (38 px bold) |
-| "ON/OFF" label on green switch | **2.38** | fails (16 px; also redundant with knob position) |
-| Locked-tile number on locked tile | 2.09 | disabled state (exempt), but very faint |
-| Ink on alert chips | 10.0 / 10.9 | pass |
-| Tray outline vs background | **1.47** | fails 3.0 for UI boundary (tray fill vs bg is 1.20) |
-| Object colour vs tray fill | red 2.43, blue 2.21, **amber 1.34**, green 1.74, purple 3.07, pink 2.05, teal 2.13, orange 2.03 | below 3.0, mitigated by the dark rim and distinct shapes |
+| Pair | Before | Now | Verdict |
+|------|-------:|----:|---------|
+| Ink text on background / on white | 11.48 / 13.06 | 11.48 / 13.06 | pass |
+| Soft grey text on background / white | 4.33 / 4.92 | **5.57 / 6.33** | pass (was failing on BG) |
+| White on primary coral button | 2.80 | **4.58** | pass (was failing) |
+| White on pressed coral | 3.87 | **6.79** | pass |
+| White on danger button | 4.18 | **5.30** | pass |
+| Tagline on background | 3.40 | **5.97** | pass |
+| "ON"/"OFF" label on switch | 2.38 | **4.80 / 5.07** | pass |
+| Coral graphics (ring, current tile, progress) on background | 2.5 | **4.03** | pass (≥ 3) |
+| Tray outline on background | 1.47 | **2.65** | improved; still below 3.0 (tray fill vs BG is 1.20) — outline is 3 px |
+| Locked-tile number on locked tile | 2.09 | 3.06 | disabled state, now ≈3 |
+| Object rims vs tray (36 % darker) | amber fill 1.34 | rims 3.14–6.00 | every shape has a ≥ 2.0 outline; unique shapes remain the primary cue |
+| Ink on alert chips | 10.0 / 10.9 | same | pass |
 
 **Not provided:** screen-reader/TalkBack support (the engine version used has no Android accessibility server), system font-size scaling, high-contrast mode, haptics, dyslexia-friendly font option, left-handed layout variant (the bottom bar is centred).
 
@@ -400,35 +403,36 @@ Reduce-motion setting · 48 dp touch targets · no time pressure, no hidden gest
 | 1200 × 1920 (tablet portrait) | 800 × 1280 | centred 780-px column with 10 px side margins |
 | 1280 × 720 (landscape/tablet/foldable) | 2275 × 1280 | centred 780-px phone-style column; large empty side areas |
 
-## 13. Known weaknesses and open questions (for the reviewer to judge)
+## 13. Status of the review findings (revision 2)
 
-Observed in the renders and measurements — **not yet playtested with real users**:
+**Resolved in this revision (verified by tests/renders):**
+1. Contrast failures — primary button text, soft captions, switch labels, tagline, coral graphics, tray outline (partially) → §11, `tests/test_contrast.gd`.
+2. Reserved-tray ghost shape and one-way arrow were easy to miss → clear **tag badges** on the tray's top edge (§5, `22_…`, `21_…`), wording updated everywhere (intro cards, rules text, refusal toasts).
+3. Padlock key shape was tiny and ice hid the object → **status pills** (§5); the shape underneath stays visible.
+4. Long refusal toasts vanished too fast → duration scales with text length (1.9–4.5 s).
+5. Restart sat next to Hint → order is now Restart · Undo · Hint.
+6. Dead space under the HUD → board sits slightly low (58 % of free height); menu block is vertically balanced with spacers.
+7. Reward moment flat → stars pop in sequentially, coins count up (respects Reduce motion).
+8. Splash logo mis-positioned and Settings dialog taller than the screen (fixed earlier in this pack).
 
-1. **Contrast failures** listed in §11 — notably white text on the coral primary button (2.80:1) and soft-grey captions (4.33:1). Is a darker coral (e.g. ≈ `#D9442F`), dark text on coral, or a different accent preferable?
-2. **Tray visibility** — tray fill barely differs from the background (1.20:1); the shape of the tray relies on a thin low-contrast outline. Should trays be darker or have a stronger outline? The amber triangle is the weakest object on the tray colour.
-3. **Reserved-tray ghost shape** (`21_…`) is very faint and sits in the *top* slot; could be missed. **One-way arrow** (`22_…`) is a tiny grey triangle; could be missed. The intro cards explain both, but only once.
-4. **Padlock badge** is small relative to the object (the key shape inside is tiny on 5-slot trays) — is it legible enough to tell *which* shape opens it?
-5. **Ice overlay** partially hides the object's shape; identification relies on the dim shape under the overlay.
-6. **Empty space:** on tall phones and on levels with few trays the board floats in a large blank area (slot size is capped at 112); menu bottom third is empty. Should the board scale up or anchor lower (thumb zone)?
-7. **Thumb reach:** the bottom bar (Undo/Hint/Restart) is centred; Pause is top-left (hardest reach). Restart sits next to Hint, a destructive action beside a frequent one (it is protected by a confirm).
-8. **Feedback richness:** no haptics; win dialog has no celebration/particles; coins are not animated; stars are static.
-9. **Hint flow** takes two taps and a dialog; the highlight stays until the next tap with no "hint used" indicator.
-10. **Learning curve for mechanics** depends on one-time modal cards that cover the board; there is no persistent legend or long-press help for the symbols (padlock, snowflake, arrow, ghost shape).
-11. **Error messaging** is a toast that vanishes in 1.9 s; users who read slowly may miss it. Reasons are accurate but sometimes long ("Locked! Clear a tray of the shape shown on the padlock to open it.").
-12. **Level select:** no explicit "completed" marker besides stars (a level cleared with 1 star looks like an unplayed one with grey stars → partially: 1-star shows one gold star, unplayed shows none); current level distinguished only by its border colour; no stage progress summary.
-13. **Typography:** single default font, synthetic bold, no brand typeface; numerals are not tabular.
-14. **Landscape/tablet:** just a centred phone column — no tailored layout.
-15. **Dialog density:** the rules dialog is a long bullet list at 24–26 px; Settings now links to it instead of embedding it.
-16. **Brand/identity:** the logo is clean but generic; is the "empty dashed slot" idea clear to first-time viewers? Store icon uses the same motif (two trays, one dashed ring).
-17. **Audio** has never been auditioned by a human (synthesised tones may feel thin or harsh).
-
-Defects found and fixed while preparing this pack (so you don't re-report them): splash logo mis-positioned; Settings dialog taller than the screen (rules text moved behind a *How to play* button).
+**Still open — for the next reviewer / playtests:**
+* Amber triangle on the tray fill is still the weakest object (rim ≥ 2.0:1 but the fill is 1.34:1). Consider a darker tray fill or a thicker rim.
+* Tray fill vs page background is 1.20:1; the 3-px outline carries the boundary.
+* Thumb reach: Pause is top-left (hardest reach); consider a bottom or top-right placement after testing on real devices.
+* No haptics — **deliberate**: vibration needs the `VIBRATE` permission and the "no permissions at all" property is a selling point; reconsider only if playtests show the need.
+* TalkBack/screen reader: impossible with Godot 4.7.1 (no Android accessibility server); documented limitation.
+* No persistent legend for the symbols (long-press help); the rules dialog and intro cards are the references.
+* Hint flow is two taps plus a dialog; the highlight has no "hint used" marker.
+* Level select lacks an explicit "completed" tick and stage progress summary.
+* Single default font with synthetic bold; no brand typeface.
+* Landscape/tablet is a centred phone column, not a tailored layout.
+* Audio and difficulty fairness have never been checked by humans (`docs/PLAYTEST_PLAN.md`, not run).
 
 ## 14. Ready-to-paste review request
 
 > You are a senior mobile game UI/UX and visual designer. Attached: a design specification for a finished Android puzzle game ("Unjam: The Last Slot"), three contact sheets and 29 individual screens.
 > Please (1) review the visual design, information hierarchy, interaction model, copy and accessibility against current mobile-game best practice and WCAG 2.2 / Material touch-target guidance;
-> (2) challenge each item in section 13 — agree, disagree or reprioritise; (3) list additional problems you see in the screenshots;
+> (2) challenge each open item in section 13 — agree, disagree or reprioritise; (3) list additional problems you see in the screenshots;
 > (4) propose **specific, minimal, implementable changes** (hex values, sizes, copy, animation timings) ranked by impact vs. effort, marking which are *must-fix before launch*, *should-fix*, and *nice-to-have*;
 > (5) say what you would test with real players. Constraints: portrait phone game, Godot 2D with procedurally drawn graphics (no image assets), offline, no ads, no custom font files, small team. Do not suggest adding new game mechanics or monetisation.
 

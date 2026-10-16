@@ -103,7 +103,7 @@ func _tile(id: int) -> Control:
 		var txt := str(id)
 		var fs := 44
 		var w := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		var col := UI.INK if unlocked else Color("9a947f")
+		var col := UI.INK if unlocked else Color("7d7863")
 		b.draw_string(f, Vector2((b.size.x - w) / 2.0, 70), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
 		if unlocked:
 			var st := Progress.stars_of(id)

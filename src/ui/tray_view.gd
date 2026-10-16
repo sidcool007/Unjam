@@ -79,12 +79,21 @@ func _draw() -> void:
 	# slot guides (capacity cue that does not rely on colour)
 	for i in cap:
 		var c := slot_center(i)
-		draw_arc(c, slot * 0.34, 0, TAU, 24, Color(UI.TRAY_EDGE, 0.9), 2.0, true)
+		draw_arc(c, slot * 0.34, 0, TAU, 24, Color(UI.TRAY_EDGE, 0.42), 2.0, true)
+	_draw_tag(tr)
+
+
+## Rule tag on the tray's top edge: a white badge showing the one shape a reserved tray
+## accepts, or an up-arrow for a one-way tray (objects can only leave it).
+func _draw_tag(tr: Rect2) -> void:
+	if accepts < 0 and not source_only:
+		return
+	var c := Vector2(tr.get_center().x, tr.position.y)
+	var r := slot * 0.31
+	draw_circle(c + Vector2(0, r * 0.12), r * 1.08, Color(0.17, 0.18, 0.29, 0.18))
+	draw_circle(c, r, Color.WHITE)
+	draw_arc(c, r, 0, TAU, 28, UI.INK, maxf(2.5, slot * 0.04), true)
 	if accepts >= 0:
-		# reserved tray: faint outline of the only type it takes + a corner tag
-		var c0 := slot_center(cap - 1) + Vector2(0, -slot * 0.0)
-		Shapes.draw_object(self, accepts, c0, slot * 0.30, 0.38)
-		draw_arc(c0, slot * 0.42, 0, TAU, 28, Color(UI.INK, 0.5), 2.5, true)
-	if source_only:
-		var a := Vector2(tr.get_center().x, tr.position.y + slot * 0.12)
-		draw_colored_polygon(PackedVector2Array([a + Vector2(-slot * 0.2, slot * 0.1), a + Vector2(slot * 0.2, slot * 0.1), a + Vector2(0, -slot * 0.12)]), Color(UI.INK, 0.55))
+		Shapes.draw_object(self, accepts, c, r * 0.58)
+	else:
+		Shapes.draw_icon(self, "out", c, r * 0.9, UI.INK)

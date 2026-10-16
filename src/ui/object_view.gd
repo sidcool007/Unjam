@@ -33,20 +33,33 @@ func _draw() -> void:
 	if selected:
 		draw_circle(c, r * 1.32, Color(1, 1, 1, 0.95))
 		draw_arc(c, r * 1.32, 0, TAU, 32, UI.ACCENT, maxf(3.0, size.x * 0.05), true)
-	var alpha := 0.55 if (locked or frozen_left > 0) else 1.0
+	# the object keeps its own shape clearly visible; status is shown by a pill below it
+	var alpha := 0.72 if locked else (0.9 if frozen_left > 0 else 1.0)
 	Shapes.draw_object(self, type, c, r, alpha)
-	if frozen_left > 0:
-		draw_circle(c, r * 1.05, Color(UI.ICE, 0.42))
-		draw_arc(c, r * 1.05, 0, TAU, 28, Color("7cc3e8"), maxf(2.0, size.x * 0.04), true)
-		Shapes.draw_snow(self, c + Vector2(0, -r * 0.1), r * 0.5, Color("4aa3d6"))
+	if frozen_left > 0 and not locked:
+		draw_arc(c, r * 1.12, 0, TAU, 32, Color("7cc3e8"), maxf(2.5, size.x * 0.05), true)
+		_draw_pill(true)
+	elif locked:
+		_draw_pill(false)
+
+
+## Status pill straddling the object's lower edge.
+## locked: [padlock] + the SHAPE that opens it · frozen: [snowflake] + moves left.
+func _draw_pill(ice: bool) -> void:
+	var w := size.x * (0.84 if not ice else 0.72)
+	var h := size.x * 0.38
+	var rect := Rect2(Vector2((size.x - w) / 2.0, size.y * 0.5 + size.x * 0.17), Vector2(w, h))
+	var fill := UI.ICE if ice else Color.WHITE
+	draw_style_box(UI.box(Color(0.17, 0.18, 0.29, 0.20), int(h / 2.0)), Rect2(rect.position + Vector2(0, 2), rect.size))
+	draw_style_box(UI.box(fill, int(h / 2.0), UI.INK, maxi(2, int(size.x * 0.03))), rect)
+	var cy := rect.get_center().y
+	if ice:
+		Shapes.draw_snow(self, Vector2(rect.position.x + h * 0.55, cy), h * 0.30, UI.INK)
 		var f := ThemeDB.fallback_font
-		var fs := int(size.x * 0.3)
+		var fs := int(h * 0.82)
 		var txt := str(frozen_left)
-		var w := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_CENTER, -1, fs).x
-		draw_string(f, c + Vector2(-w / 2.0, r * 0.78), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UI.INK)
-	if locked:
-		var key := BoardState.obj_lock(code)
-		var s := size.x * 0.54
-		var p := c + Vector2(size.x * 0.0, size.x * -0.02)
-		draw_circle(p + Vector2(s * 0.5, s * 0.55), s * 0.72, Color(1, 1, 1, 0.92))
-		Shapes.draw_lock(self, p, s, key)
+		var tw := f.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		draw_string(f, Vector2(rect.end.x - h * 0.45 - tw, cy + fs * 0.34), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, UI.INK)
+	else:
+		Shapes.draw_lock(self, Vector2(rect.position.x + h * 0.28, rect.position.y + h * 0.10), h * 0.80, -1)
+		Shapes.draw_object(self, BoardState.obj_lock(code), Vector2(rect.end.x - h * 0.62, cy), h * 0.36)

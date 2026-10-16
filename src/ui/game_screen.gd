@@ -138,6 +138,7 @@ func _build_ui(lv: Dictionary) -> void:
 	_restart_btn = IconButton.make("restart", "Restart")
 	_restart_btn.pressed.connect(_on_restart)
 	bottom.add_child(_restart_btn)
+	bottom.move_child(_restart_btn, 0)  # Restart (destructive) sits away from Hint (costs coins)
 
 	_toast = UI.label("", UI.FONT_BODY, Color.WHITE)
 	_toast.add_theme_stylebox_override("normal", UI.box(Color(UI.INK, 0.92), 28))
@@ -204,7 +205,7 @@ func _show_toast(text: String) -> void:
 		_toast_tween.kill()
 	_toast.modulate.a = 1.0
 	_toast_tween = create_tween()
-	_toast_tween.tween_interval(1.9)
+	_toast_tween.tween_interval(clampf(1.2 + text.length() * 0.05, 1.9, 4.5))  # long reasons stay readable
 	_toast_tween.tween_property(_toast, "modulate:a", 0.0, 0.3)
 
 
@@ -282,13 +283,31 @@ func _handle_win() -> void:
 	var stars := Control.new()
 	stars.custom_minimum_size = Vector2(0, 110)
 	var st: int = res["stars"]
+	var reduce := bool(Progress.settings["reduce_motion"])
+	var star_t := [0.0 if not reduce else 1.0, 0.0 if not reduce else 1.0, 0.0 if not reduce else 1.0]
 	stars.draw.connect(func():
 		for k in 3:
-			Shapes.draw_icon(stars, "star" if k < st else "star_off", Vector2(stars.size.x / 2.0 + (k - 1) * 120.0, 58.0 - (14.0 if k == 1 else 0.0)), 52.0 if k == 1 else 44.0, UI.WARN))
+			var centre := Vector2(stars.size.x / 2.0 + (k - 1) * 120.0, 58.0 - (14.0 if k == 1 else 0.0))
+			var base_r := 52.0 if k == 1 else 44.0
+			if k < st:
+				if star_t[k] > 0.0:
+					Shapes.draw_icon(stars, "star", centre, base_r * star_t[k], UI.WARN)
+			else:
+				Shapes.draw_icon(stars, "star_off", centre, base_r, UI.WARN))
 	m.add_content(stars)
+	if not reduce:
+		for k in st:
+			var kk := k
+			stars.create_tween().tween_method(func(v: float):
+				star_t[kk] = v
+				stars.queue_redraw(), 0.0, 1.0, 0.28).set_delay(0.15 + 0.2 * k).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	m.add_text("Solved in %d moves (par %d)" % [session.board.moves, par], UI.INK_SOFT, UI.FONT_BODY)
 	if res["coins_awarded"] > 0:
-		m.add_text("+%d coins" % res["coins_awarded"], UI.INK, UI.FONT_H2)
+		var n: int = res["coins_awarded"]
+		var coin_lbl := UI.label("+%d coins" % (n if reduce else 0), UI.FONT_H2)
+		m.add_content(coin_lbl)
+		if not reduce:
+			coin_lbl.create_tween().tween_method(func(v: float): coin_lbl.text = "+%d coins" % int(round(v)), 0.0, float(n), 0.55).set_delay(0.3)
 		Audio.play("coin")
 	else:
 		m.add_text("Replay: no new coins", UI.INK_SOFT, UI.FONT_SMALL)

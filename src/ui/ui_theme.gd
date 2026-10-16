@@ -7,14 +7,18 @@ const BG := Color("f3f0ea")
 const BG_DARK := Color("e7e2d8")
 const PANEL := Color("ffffff")
 const TRAY := Color("e1dccf")
-const TRAY_EDGE := Color("cfc8b7")
+const TRAY_EDGE := Color("9c9482")  # 2.65:1 on BG (was 1.47): the tray outline must be visible
 const INK := Color("2b2f4a")
-const INK_SOFT := Color("6b6f8a")
-const ACCENT := Color("ff6b5b")
-const ACCENT_DARK := Color("e24f3f")
-const GOOD := Color("2fbf71")
+const INK_SOFT := Color("5a5e7a")  # 5.57:1 on BG (was 4.33)
+const ACCENT := Color("d2432f")  # white text 4.58:1 (was 2.80), 4.03:1 as a graphic on BG
+const ACCENT_DARK := Color("a82f21")  # pressed state + tagline text (5.97:1 on BG)
+const GOOD := Color("2fbf71")  # highlights/flash only (never text background)
+const GOOD_DARK := Color("178348")  # switch ON track: white text 4.80:1
+const DANGER := Color("c23a3a")  # white text 5.30:1
+const DANGER_DARK := Color("a02e2e")
 const WARN := Color("f4b400")
 const ICE := Color("bfe6fa")
+const SWITCH_OFF := Color("756e5d")  # white "OFF" label 4.9:1
 
 ## Object palette: one colour AND one distinct shape per type (non-colour cue).
 const TYPE_COLORS := [
@@ -99,8 +103,8 @@ static func button(text: String, kind: String = "primary", font_size: int = FONT
 			down = Color(0, 0, 0, 0.06)
 			fg = INK
 		"danger":
-			fill = Color("d94a4a")
-			down = Color("b83a3a")
+			fill = DANGER
+			down = DANGER_DARK
 	var n := box(fill, 30, TRAY_EDGE if kind == "secondary" else Color(0, 0, 0, 0), 2 if kind == "secondary" else 0, kind != "ghost")
 	var p := box(down, 30)
 	n.content_margin_left = 28

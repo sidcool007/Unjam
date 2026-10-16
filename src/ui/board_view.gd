@@ -59,7 +59,7 @@ func _compute_layout() -> Dictionary:
 	var maxcap := 0
 	for c in b.caps:
 		maxcap = maxi(maxcap, c)
-	var gap := 22.0
+	var gap := 40.0  # room for the rule-tag badge that straddles each tray's top edge
 	var cell_w := size.x / cols
 	var by_h := (size.y - (rows - 1) * gap) / (rows * (maxcap + 0.3) + 0.7)
 	var by_w := (cell_w - 16.0) / 1.3
@@ -89,7 +89,7 @@ func rebuild(animate: bool) -> void:
 	var cols: int = lay["cols"]
 	var row_h: float = (lay["maxcap"] + 0.3) * _slot
 	var total_h: float = rows * row_h + (rows - 1) * float(lay["gap"]) + _lift
-	var y0 := maxf(0.0, (size.y - total_h) / 2.0) + _lift
+	var y0 := maxf(0.0, size.y - total_h) * 0.58 + _lift  # sit slightly low: nearer the thumb, less dead space under the HUD
 	for i in b.tray_count():
 		var tv := TrayView.new()
 		tv.configure(i, b.caps[i], _slot, b.accepts[i], b.source_only[i] == 1, lay["cell_w"])

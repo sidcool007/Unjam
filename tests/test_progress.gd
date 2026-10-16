@@ -231,3 +231,18 @@ func test_restore_does_not_refire_terminal_signals() -> void:
 	check(s2.restore_from(saved))
 	eq(s2.status, GameSession.Status.FAILED)
 	eq(fired[0], 0)
+
+
+func test_all_settings_persist_across_restart() -> void:
+	var p = _new_progress()
+	p.settings["sound"] = false
+	p.settings["music"] = false
+	p.settings["reduce_motion"] = true
+	check(p.save())
+	var q = _new_progress()
+	q.load_data()
+	eq(q.settings["sound"], false)
+	eq(q.settings["music"], false)
+	eq(q.settings["reduce_motion"], true)
+	p.free()
+	q.free()

@@ -37,3 +37,9 @@ No rule-engine defects were found: 31 200 randomised actions held every invarian
 * Blocked/owner: AAB (keystore + dl.google.com), device testing, application id, privacy URL, testers. See SSOT §8.
 
 2026-10-16: UI/UX/design spec + 29 rendered screens (`docs/UI_UX_DESIGN_SPEC.md`, `docs/design/`); fixed splash position and oversized Settings dialog; 80/80 tests.
+
+## UI/UX improvement pass (2026-10-16, after external review)
+Baseline reproduced (80/80, 40/40, APK 36). Findings from the reviewer's brief + own audit; each fixed with a test where behaviour changed:
+contrast tokens (`test_contrast`), tray rule tags, lock/ice status pills, Restart moved away from Hint, toast duration, board position, menu spacing,
+reward animation, intro-once + settings-persistence + 4-aspect-ratio layout tests. 91/91, validator 40/40, APK target 36 / 0 permissions.
+Not changed (and why): haptics (needs VIBRATE permission), TalkBack (engine lacks Android accessibility server), device testing (no device).

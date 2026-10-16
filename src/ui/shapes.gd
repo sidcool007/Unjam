@@ -39,7 +39,7 @@ static func polygon_points(shape: String, c: Vector2, r: float) -> PackedVector2
 static func draw_object(ci: CanvasItem, type: int, c: Vector2, r: float, alpha: float = 1.0) -> void:
 	var col: Color = UI.TYPE_COLORS[type % UI.TYPE_COLORS.size()]
 	col.a = alpha
-	var dark := col.darkened(0.28)
+	var dark := col.darkened(0.36)  # stronger rim keeps light shapes (amber) readable on the tray
 	dark.a = alpha
 	var light := col.lightened(0.38)
 	light.a = alpha * 0.85
@@ -144,6 +144,9 @@ static func draw_icon(ci: CanvasItem, name: String, c: Vector2, r: float, col: C
 				ci.draw_line(c + Vector2(-r * 0.7, r * 0.7), c + Vector2(r * 0.7, -r * 0.7), UI.ACCENT, w, true)
 		"lock":
 			draw_lock(ci, c - Vector2(r * 0.5, r * 0.6), r, -1)
+		"out":
+			ci.draw_line(c + Vector2(0, r * 0.55), c + Vector2(0, -r * 0.5), col, w * 1.3, true)
+			ci.draw_polyline(PackedVector2Array([c + Vector2(-r * 0.45, -r * 0.1), c + Vector2(0, -r * 0.6), c + Vector2(r * 0.45, -r * 0.1)]), col, w * 1.3, true)
 		"check":
 			ci.draw_polyline(PackedVector2Array([c + Vector2(-r * 0.5, 0), c + Vector2(-r * 0.12, r * 0.4), c + Vector2(r * 0.55, -r * 0.4)]), col, w * 1.2, true)
 		"close":

@@ -237,3 +237,83 @@ func test_rapid_shakes_and_selection_never_leave_things_off_grid() -> void:
 		for j in bv.objs[i].size():
 			check((bv.objs[i][j] as ObjectView).position.distance_to(bv._slot_pos(i, j)) < 0.5, "object %d/%d on its slot" % [i, j])
 	await _close()
+
+
+func _play_level1_to_win() -> void:
+	var sol: Array = Levels.get_level(1)["solution"]
+	for mv in sol:
+		await _wait_idle()
+		_screen._on_tray_tapped(mv[0])
+		_screen._on_tray_tapped(mv[1])
+	await _wait_idle()
+	for i in 4:
+		await tree.process_frame
+
+
+func _find_label_starting(prefix: String) -> Label:
+	for l in _screen.find_children("*", "Label", true, false):
+		if (l as Label).text.begins_with(prefix):
+			return l
+	return null
+
+
+func test_reward_animation_ends_on_the_exact_values() -> void:
+	Progress.settings["reduce_motion"] = false
+	await _open(1)
+	await _play_level1_to_win()
+	var want := "+%d coins" % (Progress.REWARD_BASE + 3 * Progress.REWARD_PER_STAR)
+	var n := 0
+	var lbl := _find_label_starting("+")
+	while (lbl == null or lbl.text != want) and n < 240:
+		await tree.process_frame
+		lbl = _find_label_starting("+")
+		n += 1
+	check(lbl != null and lbl.text == want, "count-up ends on %s (got %s)" % [want, lbl.text if lbl else "none"])
+	eq(Progress.coins, Progress.STARTING_COINS + Progress.REWARD_BASE + 3 * Progress.REWARD_PER_STAR, "balance paid once")
+	await _close()
+
+
+func test_reduce_motion_shows_final_reward_immediately() -> void:
+	await _open(1)
+	Progress.settings["reduce_motion"] = true
+	_screen.board_view.reduce_motion = true
+	await _play_level1_to_win()
+	var want := "+%d coins" % (Progress.REWARD_BASE + 3 * Progress.REWARD_PER_STAR)
+	var lbl := _find_label_starting("+")
+	check(lbl != null and lbl.text == want, "no count-up with reduced motion")
+	Progress.settings["reduce_motion"] = false
+	await _close()
+
+
+func test_restart_is_not_next_to_hint() -> void:
+	await _open(1)
+	var r := _screen._restart_btn.get_index()
+	var u := _screen._undo_btn.get_index()
+	var h := _screen._hint_btn.get_index()
+	check(r < u and u < h, "order is Restart, Undo, Hint (indexes %d %d %d)" % [r, u, h])
+	await _close()
+
+
+func _modal_count() -> int:
+	var n := 0
+	for ch in _screen.get_children():
+		if ch is Modal and not ch.is_queued_for_deletion():
+			n += 1
+	return n
+
+
+func test_intro_card_shows_once_then_never_interrupts_again() -> void:
+	Progress.seen_intros = {}
+	Progress.highest_unlocked = Levels.count()
+	await _open(15, false)
+	await tree.process_frame
+	eq(_modal_count(), 1, "intro card shown the first time")
+	for ch in _screen.get_children():
+		if ch is Modal:
+			ch.close()
+	await _close()
+	check(Progress.seen_intros.has(15), "remembered")
+	await _open(15, false)
+	await tree.process_frame
+	eq(_modal_count(), 0, "no interruption on later visits")
+	await _close()
