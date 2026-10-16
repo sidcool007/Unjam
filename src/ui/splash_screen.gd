@@ -10,19 +10,23 @@ func _ready() -> void:
 	bg.color = UI.BG
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(center)
 	var logo := Logo.new()
-	logo.set_anchors_preset(Control.PRESET_CENTER)
-	logo.custom_minimum_size = Vector2(620, 520)
-	logo.size = Vector2(620, 520)
-	logo.position = Vector2(50, 300)
-	add_child(logo)
+	logo.custom_minimum_size = Vector2(620, 480)
+	center.add_child(logo)
 	var msg := UI.label("Loading…", UI.FONT_BODY, UI.INK_SOFT)
-	msg.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	msg.position = Vector2(260, 1000)
-	msg.size = Vector2(200, 40)
+	msg.anchor_left = 0.1
+	msg.anchor_right = 0.9
+	msg.anchor_top = 1.0
+	msg.anchor_bottom = 1.0
+	msg.offset_top = -200
+	msg.offset_bottom = -140
 	add_child(msg)
 	if Levels.count() == 0:
 		msg.text = "Could not load levels:\n" + Levels.load_error
+		msg.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		msg.add_theme_color_override("font_color", UI.ACCENT_DARK)
 		return
 	logo.modulate.a = 0.0

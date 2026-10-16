@@ -61,3 +61,66 @@ func test_game_board_stays_inside_the_column_on_a_wide_window() -> void:
 	s.queue_free()
 	stub.queue_free()
 	await tree.process_frame
+
+
+func _screen_rect_ok(node: Control, vp: Vector2, what: String) -> void:
+	var r := node.get_global_rect()
+	check(r.position.x >= -1.0 and r.position.y >= -1.0 and r.end.x <= vp.x + 1.0 and r.end.y <= vp.y + 1.0,
+		"%s %s must lie inside the %s viewport" % [what, str(r), str(vp)])
+
+
+func test_splash_logo_is_centred_inside_the_viewport() -> void:
+	tree.root.size = Vector2i(720, 1280)
+	await tree.process_frame
+	var stub = load("res://tests/stub_main.gd").new()
+	tree.root.add_child(stub)
+	var s := SplashScreen.new()
+	s.main = stub
+	s.size = Vector2(720, 1280)
+	tree.root.add_child(s)
+	for i in 3:
+		await tree.process_frame
+	var logo: Logo = null
+	for n in s.find_children("*", "Logo", true, false):
+		logo = n
+	check(logo != null)
+	if logo != null:
+		_screen_rect_ok(logo, Vector2(720, 1280), "splash logo")
+		check(absf(logo.get_global_rect().get_center().x - 360.0) < 2.0, "logo horizontally centred")
+	s.queue_free()
+	stub.queue_free()
+	await tree.process_frame
+
+
+func test_every_dialog_fits_on_screen_with_its_buttons() -> void:
+	# Opens each menu/pause dialog and checks the whole card (incl. buttons) is inside a 720x1280 viewport.
+	tree.root.size = Vector2i(720, 1280)
+	await tree.process_frame
+	Progress.save_path = "user://test_layout_save.json"
+	Progress.level_count = Levels.count()
+	Progress.reset_all()
+	var stub = load("res://tests/stub_main.gd").new()
+	tree.root.add_child(stub)
+	var menu := MenuScreen.new()
+	menu.main = stub
+	menu.size = Vector2(720, 1280)
+	tree.root.add_child(menu)
+	for i in 3:
+		await tree.process_frame
+	var cases := {"settings": menu._open_settings, "rules": menu._show_rules, "reset": menu._confirm_reset}
+	for k in cases:
+		cases[k].call()
+		for i in 3:
+			await tree.process_frame
+		var modal: Modal = null
+		for c in menu.get_children():
+			if c is Modal and not c.is_queued_for_deletion():
+				modal = c
+		check(modal != null, "%s dialog opened" % k)
+		if modal != null:
+			_screen_rect_ok(modal._card, Vector2(720, 1280), "%s dialog card" % k)
+			modal.close()
+		await tree.process_frame
+	menu.queue_free()
+	stub.queue_free()
+	await tree.process_frame

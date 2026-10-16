@@ -15,7 +15,7 @@
 |------|-------|
 | Overall | **Release candidate, desktop-verified, API-36 build. Not device-verified. Not release-signed.** |
 | Gameplay | Complete: 40 levels, 7 mechanic stages, tutorial, undo/restart/hints/coins/save |
-| Automated tests | **78 / 78 pass** (exit 0): rules, 31 200-action fuzz, UI fuzz, save/economy, hints, campaign, layout/safe-area maths, release-config guard, ad gate |
+| Automated tests | **80 / 80 pass** (exit 0): rules, 31 200-action fuzz, UI fuzz, save/economy, hints, campaign, layout/safe-area maths, release-config guard, ad gate |
 | Level validator | **40 levels, 0 errors, 0 warnings** (exit 0); every recorded solution proven shortest by exhaustive search |
 | Debug APK | `build/unjam-debug.apk` (57 133 192 B, git-ignored): **targetSdkVersion 36**, compileSdk 36, min SDK 24, arm64-v8a + x86_64, portrait, **0 permissions**, v2+v3 signature OK (debug key). |
 | Google Play target-API rule | Official page (read 2026-10-16): new apps/updates from 31 Aug 2026 must target **API 36**. **Met by the APK** (was *not* met at target 35 — fixed by Godot 4.6 → 4.7.1). |
@@ -57,7 +57,7 @@
 
 ```bash
 godot --headless --path . --import                                   # once / after file changes
-godot --headless --path . --script res://tests/test_runner.gd        # expect: 78 tests, 78 passed; exit 0
+godot --headless --path . --script res://tests/test_runner.gd        # expect: 80 tests, 80 passed; exit 0
 godot --headless --path . --script res://tools/validate_levels.gd    # expect: 40 levels, 0 errors, 0 warnings; exit 0
 godot --headless --path . --export-debug "Android Debug" build/unjam-debug.apk
 aapt dump badging build/unjam-debug.apk | grep -E "targetSdk|uses-permission"   # expect target 36, no permissions
@@ -111,7 +111,7 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 | 11 | Save: unlocks, completed, current level, coins, settings, tutorial, active session; validated; corrupt-safe; save at transitions | ✅ | `test_progress` (round trip, corruption, backup, sanitising, suspend flush, session restore) |
 | 12 | Ad architecture, no ads shipped, no double rewards, no fake rewards | ✅ | `test_services` |
 | 13 | Modular architecture, single state model, signals, no duplicated rules | ✅ | `docs/ARCHITECTURE.md` |
-| 14 | Unit/logic/level tests listed in brief | ✅ | 78 tests incl. suspend/resume, repeated taps during animation, 31 200-action fuzz |
+| 14 | Unit/logic/level tests listed in brief | ✅ | 80 tests incl. suspend/resume, repeated taps during animation, 31 200-action fuzz |
 | 14 | Tutorial text accurately describes actual rules | 🟡 | Automated: each intro's promised mechanic exists on its level; every refusal reason has text; rules text covers every mechanic. Wording clarity needs a human playtest (`docs/PLAYTEST_PLAN.md`, not run) |
 | 14 | **Android: run on device/emulator, test touch/audio/persistence/navigation, inspect logs** | ❌ | Impossible in this environment; full procedure + empty results table in `docs/DEVICE_TEST_PLAN.md` |
 | 15 | Lightweight, no needless permissions, no input duplication | 🟡 | Manifest: 0 permissions; duplicate input guarded & tested; **no on-device perf measurement** |
@@ -174,6 +174,7 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 | 2026-10-16 | Adaptive icon: 685 px outside safe zone → 0 after scaling; store icon/feature graphic/6 screenshots generated; `store/` excluded from APK | measured + inspected |
 | 2026-10-16 | AAB attempt in scratch copy: stops at missing keystore; with throw-away key (deleted) stops at AGP resolution (`dl.google.com` 403) | blockers recorded in `docs/ANDROID.md` |
 | 2026-10-16 | New tests: tutorial-claims (+2), release-config guard (4), layout (5); APK dependency scan: no ad/analytics/network libs | **78/78**, validator 0 errors |
+| 2026-10-16 | Rendering all 29 screens for the UI spec exposed 2 defects: splash logo mis-positioned, Settings dialog taller than the screen → fixed (`test_layout` +2) | **80/80**; spec written (`docs/UI_UX_DESIGN_SPEC.md`) incl. measured WCAG contrast gaps for review |
 
 Known historical bug to keep in mind: packed arrays stored inside an `Array` alias on assignment in Godot —
 `BoardState.clone()` copies explicitly (`test_clone_is_independent`).
@@ -191,6 +192,7 @@ Known historical bug to keep in mind: packed arrays stored inside an `Array` ali
 | Device test matrix + results log (NOT RUN) | [`docs/DEVICE_TEST_PLAN.md`](docs/DEVICE_TEST_PLAN.md) |
 | Human playtest protocol (NOT RUN) | [`docs/PLAYTEST_PLAN.md`](docs/PLAYTEST_PLAN.md) |
 | Export / toolchain / blockers evidence | [`docs/ANDROID.md`](docs/ANDROID.md) |
+| UI / UX / design specification (+ 29 current screens) | [`docs/UI_UX_DESIGN_SPEC.md`](docs/UI_UX_DESIGN_SPEC.md) · images in `docs/design/` |
 | Release signing procedure | [`docs/SIGNING.md`](docs/SIGNING.md) |
 | Play listing assets, privacy policy draft, console prep | [`store/`](store/) |
 | Licences / dependencies | [`ASSETS_AND_LICENSES.md`](docs/ASSETS_AND_LICENSES.md) |

@@ -41,6 +41,7 @@ introduced one at a time. Full rules: [`docs/RULES.md`](docs/RULES.md).
 | [TESTING.md](docs/TESTING.md) | test commands and actual results |
 | [DEVICE_TEST_PLAN.md](docs/DEVICE_TEST_PLAN.md) | Android device test matrix + results log (not run) |
 | [PLAYTEST_PLAN.md](docs/PLAYTEST_PLAN.md) | human playtest protocol (not run) |
+| [UI_UX_DESIGN_SPEC.md](docs/UI_UX_DESIGN_SPEC.md) | UI/UX/design specification with 29 current screens (`docs/design/`) |
 | [SIGNING.md](docs/SIGNING.md) | secure release-signing procedure (no key exists) |
 | [store/](store/) | Play listing assets, privacy-policy draft, Play Console prep |
 | [ANDROID.md](docs/ANDROID.md) | export instructions, what was and wasn't built |

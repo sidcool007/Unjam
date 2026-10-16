@@ -10,7 +10,7 @@ godot --headless --path . --script res://tools/validate_levels.gd # exhaustive l
 frames. UI tests drive the real `GameScreen` with taps.
 
 ### Latest results (Godot 4.7.1.stable, 2026-10-16; also green on 4.6 and 4.3)
-* **78 tests, 78 passed, 0 failed** (exit code 0)
+* **80 tests, 80 passed, 0 failed** (exit code 0)
   * `test_board_rules` (14): legal/illegal moves, match rule, full trays, clear rule,
     reserved & one-way trays, locks (unlock on clear), ice (thaw by move count), move
     limit failure, deadlock failure, exact undo, undo after failure, restart, clone independence.
@@ -34,7 +34,7 @@ frames. UI tests drive the real `GameScreen` with taps.
     vs `check_move`, blocked objects never pickable); win on the final allowed move; undo across clears/locks/ice.
   * `test_ui_fuzz` (4): random taps (also hammering during animations), undo, restart, hint and pause on 7
     levels; after every idle point the view must mirror the model exactly (objects, positions, highlights, dialogs).
-  * `test_layout` (5): safe-area/cutout arithmetic and the responsive column (SIMULATED geometry, not a device).
+  * `test_layout` (7): safe-area/cutout arithmetic, responsive column, splash logo centred, every dialog fits the screen (SIMULATED geometry, not a device).
   * `test_release_config` (4): identity/version consistent across presets and project, 0 permissions, no credentials in tracked config, AAB preset sane.
   * `test_campaign` also checks that each intro card's promised mechanic really exists on the level that shows it (+2 tests).
   * `test_services` (4): ad gate grants at most once, never without a request, never faked;

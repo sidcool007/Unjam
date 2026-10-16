@@ -35,3 +35,5 @@ No rule-engine defects were found: 31 200 randomised actions held every invarian
 * Fixed: landscape/tablet stretching (responsive column), adaptive-icon safe zone; added store assets, privacy-policy and Play Console drafts,
   device/playtest/signing procedures, release-config guard test, tutorial-claim tests.
 * Blocked/owner: AAB (keystore + dl.google.com), device testing, application id, privacy URL, testers. See SSOT §8.
+
+2026-10-16: UI/UX/design spec + 29 rendered screens (`docs/UI_UX_DESIGN_SPEC.md`, `docs/design/`); fixed splash position and oversized Settings dialog; 80/80 tests.

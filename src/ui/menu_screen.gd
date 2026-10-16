@@ -93,10 +93,16 @@ func _open_settings() -> void:
 	Audio.play("tap")
 	var m := Modal.make("Settings")
 	m.add_content(SettingsPanel.make())
-	m.add_text("How to play", UI.INK_SOFT, UI.FONT_SMALL)
-	m.add_text(CampaignText.RULES_TEXT, UI.INK, UI.FONT_SMALL)
+	m.add_button("How to play", "secondary", func(): _show_rules())
 	var reset := m.add_button("Reset all progress", "ghost", func(): _confirm_reset(), false)
 	m.add_button("Done", "primary")
+	add_child(m)
+
+
+func _show_rules() -> void:
+	var m := Modal.make("How to play")
+	m.add_text(CampaignText.RULES_TEXT, UI.INK, UI.FONT_SMALL + 2)
+	m.add_button("Got it", "primary")
 	add_child(m)
 
 

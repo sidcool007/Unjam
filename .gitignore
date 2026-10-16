@@ -7,3 +7,4 @@ build/
 .android/
 export_credentials.cfg
 *.translation
+*.zip
