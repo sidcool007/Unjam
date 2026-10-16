@@ -16,6 +16,7 @@ Section 13 lists weaknesses I measured or noticed, and Section 14 is a ready-to-
 | `docs/design/sheets/sheet_2_gameplay_and_hints.png` | contact sheet: gameplay states, restart/hint dialogs (screens 11–20) |
 | `docs/design/sheets/sheet_3_mechanics_dialogs_results.png` | contact sheet: mechanics levels, pause, rules, win, fail (screens 21–29) |
 | `docs/design/screens/NN_*.png` | the 29 individual screens, 1080×1920 (= the 720×1280 design canvas ×1.5) |
+| `docs/design/UNJAM_UI_UX_Design_Spec.pdf` | **single self-contained PDF (21 pages): this spec + all 29 screens embedded — easiest to hand to a reviewer** |
 | `docs/design/UNJAM_design_pack.zip` | all of the above in one file (not tracked in git; rebuild by zipping the spec + `docs/design/{sheets,screens}`) |
 
 All screenshots are rendered by the **real game screens** on a desktop OpenGL context (not photographed on a phone), so
