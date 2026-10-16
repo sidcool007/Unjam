@@ -26,3 +26,5 @@ Defects found by code review + randomised exploration, all fixed and covered by 
 5. A resize during an animation left a stale layout (now re-laid-out when the animation ends).
 6. Toasts used fixed pixel positions and could overlap the board on tall phones (now bottom-anchored).
 No rule-engine defects were found: 31 200 randomised actions held every invariant.
+
+2026-10-16: added docs/SSOT.md; raised minimum touch target 88→96 logical px (48 dp on a 360 dp phone).

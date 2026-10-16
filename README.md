@@ -33,6 +33,7 @@ introduced one at a time. Full rules: [`docs/RULES.md`](docs/RULES.md).
 ## Documentation
 | Doc | Contents |
 |-----|----------|
+| **[SSOT.md](docs/SSOT.md)** | **single source of truth: current state, requirement traceability, blockers** |
 | [RULES.md](docs/RULES.md) | canonical movement/board/win specification |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | modules, data flow, design decisions |
 | [LEVELS.md](docs/LEVELS.md) | level format, authoring, generator, validator |

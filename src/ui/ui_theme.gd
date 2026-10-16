@@ -28,7 +28,7 @@ const FONT_H1 := 44
 const FONT_H2 := 34
 const FONT_BODY := 28
 const FONT_SMALL := 22
-const MIN_TOUCH := 88  # logical px (>= 48dp on every common phone at 720 wide)
+const MIN_TOUCH := 96  # logical px at 720 wide = 48 dp on a 360 dp phone (Android minimum touch target)
 
 
 static var _bold: FontVariation
