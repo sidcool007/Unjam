@@ -37,13 +37,15 @@ static func polygon_points(shape: String, c: Vector2, r: float) -> PackedVector2
 
 ## Draws one game object (body, rim, sheen) centred at c with radius r.
 static func draw_object(ci: CanvasItem, type: int, c: Vector2, r: float, alpha: float = 1.0) -> void:
-	var col: Color = UI.TYPE_COLORS[type % UI.TYPE_COLORS.size()]
+	var ti := type % UI.TYPE_COLORS.size()
+	var col: Color = UI.TYPE_COLORS[ti]
 	col.a = alpha
-	var dark := col.darkened(0.36)  # stronger rim keeps light shapes (amber) readable on the tray
+	var dark := col.darkened(UI.RIM_DARKEN[ti])
 	dark.a = alpha
+	var inset: float = UI.RIM_INSET[ti]
 	var light := col.lightened(0.38)
 	light.a = alpha * 0.85
-	var shape: String = UI.SHAPE_NAMES[type % UI.SHAPE_NAMES.size()]
+	var shape: String = UI.SHAPE_NAMES[ti]
 	# soft shadow (flat ellipse under the object)
 	ci.draw_set_transform(c + Vector2(0, r * 0.86), 0.0, Vector2(1.0, 0.32))
 	ci.draw_circle(Vector2.ZERO, r * 0.85, Color(0.17, 0.18, 0.29, 0.16 * alpha))
@@ -51,16 +53,16 @@ static func draw_object(ci: CanvasItem, type: int, c: Vector2, r: float, alpha: 
 	match shape:
 		"circle":
 			ci.draw_circle(c, r, dark)
-			ci.draw_circle(c + Vector2(0, -r * 0.06), r * 0.9, col)
+			ci.draw_circle(c + Vector2(0, -r * 0.06), r * (inset + 0.02), col)
 		"square":
 			var s := r * 0.92
 			_rounded_rect(ci, Rect2(c - Vector2(s, s), Vector2(s, s) * 2.0), r * 0.3, dark)
-			var s2 := s * 0.9
+			var s2 := s * (inset + 0.02)
 			_rounded_rect(ci, Rect2(c - Vector2(s2, s2 + r * 0.05), Vector2(s2, s2) * 2.0), r * 0.26, col)
 		_:
 			var pts := polygon_points(shape, c, r)
 			ci.draw_colored_polygon(pts, dark)
-			var inner := polygon_points(shape, c + Vector2(0, -r * 0.05), r * 0.88)
+			var inner := polygon_points(shape, c + Vector2(0, -r * 0.05), r * inset)
 			ci.draw_colored_polygon(inner, col)
 	# sheen
 	ci.draw_circle(c + Vector2(-r * 0.3, -r * 0.34), r * 0.17, light)

@@ -1,6 +1,6 @@
 # UNJAM: THE LAST SLOT — UI / UX / Design Specification (current state)
 
-*Version of the game described: 0.1.0 (release candidate) · Godot 4.7.1 · **revision 2 (2026-10-16): updated after the UI/UX improvement pass** (contrast tokens, tray rule tags, status pills, action-bar order, reward animation). Screens in `docs/design/` were re-rendered from the updated game.*
+*Version of the game described: 0.1.0 (release candidate) · Godot 4.7.1 · **revision 3 (2026-10-17): after the second review pass** — amber triangle fill/rim, stronger tray outline, hint-state and dialog verification tests; revision 2 added contrast tokens, tray rule tags, status pills, action-bar order, reward animation. Screens in `docs/design/` were re-rendered from the updated game.*
 *Purpose: hand this file (plus the images in `docs/design/`) to a design reviewer — human or AI — and ask what should change.
 Everything here describes **what exists today**, with exact values taken from the source; nothing is aspirational.
 Section 13 lists weaknesses I measured or noticed, and Section 14 is a ready-to-paste review request.*
@@ -15,6 +15,7 @@ Section 13 lists weaknesses I measured or noticed, and Section 14 is a ready-to-
 | `docs/design/sheets/sheet_1_menus_levelselect_tutorial.png` | contact sheet: splash, menus, settings, level select, credits, tutorial intro (screens 01–10) |
 | `docs/design/sheets/sheet_2_gameplay_and_hints.png` | contact sheet: gameplay states, restart/hint dialogs (screens 11–20) |
 | `docs/design/sheets/sheet_3_mechanics_dialogs_results.png` | contact sheet: mechanics levels, pause, rules, win, fail (screens 21–29) |
+| `docs/design/sheets/sheet_4_amber_triangle_before_after.png` | all 8 shapes, and the amber triangle in every state (normal, selected, locked, frozen, on page background): **top = before, bottom = after** |
 | `docs/design/screens/NN_*.png` | the 29 individual screens, 1080×1920 (= the 720×1280 design canvas ×1.5) |
 | `docs/design/UNJAM_UI_UX_Design_Spec.pdf` | **single self-contained PDF (21 pages): this spec + all 29 screens embedded — easiest to hand to a reviewer** |
 | `docs/design/UNJAM_design_pack.zip` | all of the above in one file (not tracked in git; rebuild by zipping the spec + `docs/design/{sheets,screens}`) |
@@ -67,7 +68,8 @@ fonts/antialiasing may differ slightly from a device. Regenerate with `tools/mak
 | `BG_DARK` | `#E7E2D8` | pressed state of secondary/icon buttons |
 | `PANEL` | `#FFFFFF` | cards, dialogs, chips, secondary buttons, level tiles |
 | `TRAY` | `#E1DCCF` | tray body, progress-bar track |
-| `TRAY_EDGE` | `#9C9482` | tray outline (2.65:1 on BG), chip/button outlines; slot guide rings use it at 42 % |
+| `TRAY_OUTLINE` | `#857D6C` | tray boundary, 4 px (3.59:1 on BG) |
+| `TRAY_EDGE` | `#9C9482` | chip/button outlines (2.65:1 on BG); slot guide rings use it at 42 % |
 | `INK` | `#2B2F4A` | primary text, icons, dashed "last slot" ring, toast background, padlock |
 | `INK_SOFT` | `#5A5E7A` | secondary text (level name, captions, stage headers, stats) — 5.57:1 on BG |
 | `ACCENT` | `#D2432F` | primary button fill (white text 4.58:1), selection ring, current-level tile border, progress fill |
@@ -82,13 +84,13 @@ fonts/antialiasing may differ slightly from a device. Regenerate with `tools/mak
 | Dim behind dialogs | `#1A1C33` @ 55 % | modal scrim |
 | Locked tile | fill `#DCD6C7`, number `#7D7863` | locked level tiles (number 3.06:1) |
 
-### 4.2 Object palette (8 types: colour + shape; each has a darker rim 36 % and light sheen)
+### 4.2 Object palette (8 types: colour + shape; each has a rim 36 % darker and a light sheen — only the amber triangle gets a 50 % darker, thicker rim, tokens `RIM_DARKEN`/`RIM_INSET`)
 
 | Type | Colour | Shape |
 |------|--------|-------|
 | 0 | `#EF5B5B` red | circle |
 | 1 | `#2E9BE6` blue | rounded square |
-| 2 | `#F5B400` amber | triangle |
+| 2 | `#EAA600` amber (was `#F5B400`) | triangle — rim 50 % darker and thicker |
 | 3 | `#2FBF71` green | hexagon |
 | 4 | `#8E5CF5` purple | diamond |
 | 5 | `#F06BB5` pink | star (5-point) |
@@ -117,7 +119,7 @@ Line wrapping: word-smart; text is centred in dialogs, left-aligned in Credits a
 |---------|--------|--------|--------|
 | Buttons (primary/danger/secondary) | 30 | secondary: 2 px `TRAY_EDGE` | soft: 10 px blur, +5 px y, ink @ 18 % (ghost buttons: none) |
 | Dialog card | 40 | none | soft (same) |
-| Tray | 0.34 × slot size | 3 px `TRAY_EDGE` | none |
+| Tray | 0.34 × slot size | 4 px `TRAY_OUTLINE` | none |
 | Chips (moves/free slots/coins) | 28–30 | 2 px `TRAY_EDGE` | none |
 | Toast | 28 | none | none |
 | Level tile | 30 | 2 px `TRAY_EDGE` (current: 5 px `ACCENT`) | soft when unlocked |
@@ -386,9 +388,9 @@ Reduce-motion setting · 48 dp touch targets · no time pressure, no hidden gest
 | Tagline on background | 3.40 | **5.97** | pass |
 | "ON"/"OFF" label on switch | 2.38 | **4.80 / 5.07** | pass |
 | Coral graphics (ring, current tile, progress) on background | 2.5 | **4.03** | pass (≥ 3) |
-| Tray outline on background | 1.47 | **2.65** | improved; still below 3.0 (tray fill vs BG is 1.20) — outline is 3 px |
+| Tray outline on background | 1.47 | **3.59** | pass (3:1 graphical boundary) — tray *fill* vs page is 1.20:1 but the boundary is the outline |
 | Locked-tile number on locked tile | 2.09 | 3.06 | disabled state, now ≈3 |
-| Object rims vs tray (36 % darker) | amber fill 1.34 | rims 3.14–6.00 | every shape has a ≥ 2.0 outline; unique shapes remain the primary cue |
+| Object rims vs tray fill | amber fill 1.34 | rims **3.90–6.00** (amber rim 5.12); amber fill 1.54 | every shape's boundary ≥ 3:1 (enforced); amber fill itself stays low, so it is carried by its dark rim and unique triangle shape |
 | Ink on alert chips | 10.0 / 10.9 | same | pass |
 
 **Not provided:** screen-reader/TalkBack support (the engine version used has no Android accessibility server), system font-size scaling, high-contrast mode, haptics, dyslexia-friendly font option, left-handed layout variant (the bottom bar is centred).
@@ -403,30 +405,30 @@ Reduce-motion setting · 48 dp touch targets · no time pressure, no hidden gest
 | 1200 × 1920 (tablet portrait) | 800 × 1280 | centred 780-px column with 10 px side margins |
 | 1280 × 720 (landscape/tablet/foldable) | 2275 × 1280 | centred 780-px phone-style column; large empty side areas |
 
-## 13. Status of the review findings (revision 2)
+## 13. Status of the review findings (revision 3)
 
-**Resolved in this revision (verified by tests/renders):**
-1. Contrast failures — primary button text, soft captions, switch labels, tagline, coral graphics, tray outline (partially) → §11, `tests/test_contrast.gd`.
-2. Reserved-tray ghost shape and one-way arrow were easy to miss → clear **tag badges** on the tray's top edge (§5, `22_…`, `21_…`), wording updated everywhere (intro cards, rules text, refusal toasts).
-3. Padlock key shape was tiny and ice hid the object → **status pills** (§5); the shape underneath stays visible.
-4. Long refusal toasts vanished too fast → duration scales with text length (1.9–4.5 s).
-5. Restart sat next to Hint → order is now Restart · Undo · Hint.
-6. Dead space under the HUD → board sits slightly low (58 % of free height); menu block is vertically balanced with spacers.
-7. Reward moment flat → stars pop in sequentially, coins count up (respects Reduce motion).
-8. Splash logo mis-positioned and Settings dialog taller than the screen (fixed earlier in this pack).
+**Resolved and verified (tests and re-rendered screens):**
+1. Contrast failures (primary button text, captions, switch labels, tagline, coral graphics) → §11, `tests/test_contrast.gd`.
+2. Rule tags for reserved and one-way trays → badge on the tray's top edge (screens 21, 22), wording aligned in intro cards, rules text and refusal toasts.
+3. Padlock/ice legibility → status pills that leave the shape visible (screens 20, 23, 24).
+4. Toast duration scales with text length; Restart moved away from Hint; board position and menu spacing; staged reward animation.
+5. **Amber triangle** (weakest object): fill `#F5B400 → #EAA600` and a 50 %-darker, thicker rim for that shape only; rim now 5.1:1 on the tray, fill 1.46:1, hue still yellow-orange and ≥ 50 RGB-distance from the orange cross; checked normal / selected / locked / frozen / stacked / on page background (`sheet_4_…`). No other shape was darkened.
+6. **Tray boundary** → dedicated `TRAY_OUTLINE` token, 4 px, 3.59:1 on the page (was 2.65:1 at 3 px); tray fill unchanged to keep the paper look; verified on level 40.
+7. **Hint state** → tests prove: the highlight persists until the next interaction (no timeout), Undo and Restart clear it and reset any pulsed object, a stale/illegal hint is never charged, insufficient coins explain accurately and charge nothing, double-pressing the confirmation charges once.
+8. **Dialogs** → tests prove each dialog (pause, rules, hint, insufficient coins, restart, win, fail) has ≤ 1 coral primary, the destructive restart uses the danger style, and win/fail dialogs are not dismissible.
+9. **Legibility on small layouts** → across all 40 levels the smallest slot is 80 logical px on every phone aspect (guarded by a test ≥ 76): rule tags ≈ 25 px radius, status pills ≈ 30 px tall with ≈ 25 px digits.
 
-**Still open — for the next reviewer / playtests:**
-* Amber triangle on the tray fill is still the weakest object (rim ≥ 2.0:1 but the fill is 1.34:1). Consider a darker tray fill or a thicker rim.
-* Tray fill vs page background is 1.20:1; the 3-px outline carries the boundary.
-* Thumb reach: Pause is top-left (hardest reach); consider a bottom or top-right placement after testing on real devices.
-* No haptics — **deliberate**: vibration needs the `VIBRATE` permission and the "no permissions at all" property is a selling point; reconsider only if playtests show the need.
-* TalkBack/screen reader: impossible with Godot 4.7.1 (no Android accessibility server); documented limitation.
-* No persistent legend for the symbols (long-press help); the rules dialog and intro cards are the references.
-* Hint flow is two taps plus a dialog; the highlight has no "hint used" marker.
-* Level select lacks an explicit "completed" tick and stage progress summary.
-* Single default font with synthetic bold; no brand typeface.
-* Landscape/tablet is a centred phone column, not a tailored layout.
-* Audio and difficulty fairness have never been checked by humans (`docs/PLAYTEST_PLAN.md`, not run).
+**Evaluated, deliberately not changed (provisional until real-device use):**
+* **Pause position (top-left):** it is an infrequent action, Android Back also opens Pause during play, and the frequent actions (Undo/Hint/Restart) are in the bottom thumb zone. Not relocated; revisit only if device testing or playtests show reach problems.
+* **Level select:** current level (coral border), completed levels (gold stars; a cleared level always shows ≥ 1 gold star while an unplayed one shows none), locked levels (padlock) and stage headers already communicate state. No extra tick or stage counter was added to avoid clutter.
+
+**Still open:**
+* Tray fill vs page background is 1.20:1 (the outline carries the boundary).
+* No haptics (deliberate: needs the `VIBRATE` permission).
+* TalkBack/screen reader impossible with Godot 4.7.1 (no Android accessibility server).
+* No persistent symbol legend (long-press help); hint flow is two taps plus a dialog.
+* Single default font with synthetic bold; landscape/tablet is a centred phone column.
+* **Audio, difficulty fairness and real-device touch/reach have never been tested by humans or on a device** (`docs/PLAYTEST_PLAN.md`, `docs/DEVICE_TEST_PLAN.md`: not run).
 
 ## 14. Ready-to-paste review request
 

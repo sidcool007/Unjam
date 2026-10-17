@@ -22,6 +22,6 @@
 * Dead-end positions (moves exist but the level can't be won) are announced only when the player taps Hint (free).
 * A hint is a good next move, not necessarily the shortest plan; search is capped (40 000 nodes) with fallback to the authored solution.
 * **No haptics, by decision:** vibration requires the `VIBRATE` permission; the app currently requests none.
-* UI items still open after the improvement pass are listed in `docs/UI_UX_DESIGN_SPEC.md` §13 (amber-on-tray contrast, Pause reach, no symbol legend, etc.).
+* UI items still open after two improvement passes are listed in `docs/UI_UX_DESIGN_SPEC.md` §13: tray fill vs page 1.20:1 (outline carries the boundary), amber fill 1.46:1 (carried by its 5.1:1 rim), no symbol legend, Pause reach (provisional — evaluated, not changed, needs real-device use).
 * Replays pay no coins (finite economy ≈ 1 200 coins + 30 start).
 * Debug APK ≈57 MB (debug template, two ABIs); a release AAB will be smaller per device.

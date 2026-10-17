@@ -66,7 +66,7 @@ func _draw() -> void:
 	var base := UI.TRAY
 	if source_only:
 		base = base.darkened(0.08)
-	var sb := UI.box(base, int(slot * 0.34), UI.TRAY_EDGE, 3)
+	var sb := UI.box(base, int(slot * 0.34), UI.TRAY_OUTLINE, 4)
 	draw_style_box(sb, tr)
 	if flash > 0.0:
 		draw_style_box(UI.box(Color(UI.GOOD, 0.55 * flash), int(slot * 0.34)), tr)

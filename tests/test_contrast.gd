@@ -54,5 +54,26 @@ func test_graphical_parts_meet_3_to_1_where_they_carry_meaning() -> void:
 
 func test_every_object_rim_is_visible_on_the_tray() -> void:
 	for i in UI.TYPE_COLORS.size():
-		var rim: Color = UI.TYPE_COLORS[i].darkened(0.36)
-		_min(rim, UI.TRAY, 2.0, "rim of object type %d (%s)" % [i, UI.SHAPE_NAMES[i]])
+		var rim: Color = UI.TYPE_COLORS[i].darkened(UI.RIM_DARKEN[i])
+		_min(rim, UI.TRAY, 3.0, "rim of object type %d (%s) — the object's boundary needs 3:1" % [i, UI.SHAPE_NAMES[i]])
+
+
+func test_amber_triangle_is_improved_but_stays_amber_and_distinct() -> void:
+	var amber: Color = UI.TYPE_COLORS[2]
+	check(ratio(amber, UI.TRAY) >= 1.4, "amber fill on tray %.2f (was 1.34)" % ratio(amber, UI.TRAY))
+	check(amber.r > 0.85 and amber.g > 0.60 and amber.b < 0.10, "still a yellow-orange hue")
+	var orange: Color = UI.TYPE_COLORS[7]
+	var d := Vector3(amber.r - orange.r, amber.g - orange.g, amber.b - orange.b).length() * 255.0
+	check(d >= 50.0, "amber stays distinguishable from the orange cross (RGB distance %.0f)" % d)
+	var thick: float = UI.RIM_INSET[2]
+	for i in UI.RIM_INSET.size():
+		if i != 2:
+			check(UI.RIM_INSET[i] > thick, "only the amber triangle gets the extra-thick rim")
+	for i in UI.RIM_DARKEN.size():
+		if i != 2:
+			check(UI.RIM_DARKEN[i] <= 0.36, "other shapes are not darkened")
+
+
+func test_tray_outline_is_a_visible_boundary() -> void:
+	_min(UI.TRAY_OUTLINE, UI.BG, 3.0, "tray outline on page background")
+	_min(UI.INK, UI.TRAY, 4.5, "ink on tray fill")

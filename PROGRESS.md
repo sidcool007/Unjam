@@ -43,3 +43,8 @@ Baseline reproduced (80/80, 40/40, APK 36). Findings from the reviewer's brief +
 contrast tokens (`test_contrast`), tray rule tags, lock/ice status pills, Restart moved away from Hint, toast duration, board position, menu spacing,
 reward animation, intro-once + settings-persistence + 4-aspect-ratio layout tests. 91/91, validator 40/40, APK target 36 / 0 permissions.
 Not changed (and why): haptics (needs VIBRATE permission), TalkBack (engine lacks Android accessibility server), device testing (no device).
+
+## Second review pass (2026-10-17)
+Baseline 91/91, 40/40, APK 36. Amber triangle: deeper fill + thicker 50 % rim for that shape only (verified in normal/selected/locked/frozen/stacked/page-bg, before/after sheet);
+tray outline token 3.59:1. Tests added for hint-state, dialog hierarchy, result-dialog dismissal, minimum slot size, amber contrast (99/99). Pause position and level-select indicators evaluated and left unchanged
+(provisional, documented). Not changed: haptics (permission), TalkBack (engine), device testing (no device), AAB (SDK host denied + owner key).

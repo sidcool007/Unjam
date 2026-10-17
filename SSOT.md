@@ -15,14 +15,14 @@
 |------|-------|
 | Overall | **Release candidate, desktop-verified, API-36 build. Not device-verified. Not release-signed.** |
 | Gameplay | Complete: 40 levels, 7 mechanic stages, tutorial, undo/restart/hints/coins/save |
-| Automated tests | **91 / 91 pass** (exit 0): rules, 31 200-action fuzz, UI fuzz, save/economy, hints, campaign, layout (4 phone aspect ratios)/safe-area maths, **contrast tokens**, release-config guard, ad gate |
+| Automated tests | **99 / 99 pass** (exit 0): rules, 31 200-action fuzz, UI fuzz, save/economy, hints, campaign, layout (4 phone aspect ratios)/safe-area maths, **contrast tokens**, release-config guard, ad gate |
 | Level validator | **40 levels, 0 errors, 0 warnings** (exit 0); every recorded solution proven shortest by exhaustive search |
 | Debug APK | `build/unjam-debug.apk` (57 133 192 B, git-ignored): **targetSdkVersion 36**, compileSdk 36, min SDK 24, arm64-v8a + x86_64, portrait, **0 permissions**, v2+v3 signature OK (debug key). |
 | Google Play target-API rule | Official page (read 2026-10-16): new apps/updates from 31 Aug 2026 must target **API 36**. **Met by the APK** (was *not* met at target 35 — fixed by Godot 4.6 → 4.7.1). |
 | Real device / emulator run | **Never done** — none available (`adb devices` empty, no KVM) → `docs/DEVICE_TEST_PLAN.md`, all NOT RUN |
 | Release AAB | **BLOCKED**: (1) no release/upload keystore (owner), (2) `dl.google.com` denied by egress policy → Android Gradle Plugin / SDK platform 36 unobtainable here |
 | Play listing assets | Icon 512, feature graphic, 6 screenshots in `store/` (rendered by the game on desktop GL, not device captures) |
-| UI/UX improvement pass | **VERIFIED** (tests + re-rendered 29 screens): WCAG contrast fixed and locked by tests; tray rule tags; lock/ice status pills; action-bar order; reward animation; layout on 5:3 / 16:9 / 20:9 / 21:9 windows. Open items listed in `docs/UI_UX_DESIGN_SPEC.md` §13 |
+| UI/UX improvement pass (2 rounds) | **VERIFIED** (tests + re-rendered 29 screens): WCAG contrast fixed and locked by tests; amber triangle (deeper fill, 5.1:1 rim) and 3.59:1 tray outline; hint-state, dialog-hierarchy and minimum-slot-size tests; tray rule tags; lock/ice status pills; action-bar order; reward animation; layout on 5:3 / 16:9 / 20:9 / 21:9 windows. Open items listed in `docs/UI_UX_DESIGN_SPEC.md` §13 |
 | Compliance drafts | Privacy policy + Play Console prep drafted (`store/`), **nothing submitted**, owner fields/decisions open |
 | Store readiness | **Not ready** — see §8 |
 
@@ -58,7 +58,7 @@
 
 ```bash
 godot --headless --path . --import                                   # once / after file changes
-godot --headless --path . --script res://tests/test_runner.gd        # expect: 91 tests, 91 passed; exit 0
+godot --headless --path . --script res://tests/test_runner.gd        # expect: 99 tests, 99 passed; exit 0
 godot --headless --path . --script res://tools/validate_levels.gd    # expect: 40 levels, 0 errors, 0 warnings; exit 0
 godot --headless --path . --export-debug "Android Debug" build/unjam-debug.apk
 aapt dump badging build/unjam-debug.apk | grep -E "targetSdk|uses-permission"   # expect target 36, no permissions
@@ -112,7 +112,7 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 | 11 | Save: unlocks, completed, current level, coins, settings, tutorial, active session; validated; corrupt-safe; save at transitions | ✅ | `test_progress` (round trip, corruption, backup, sanitising, suspend flush, session restore) |
 | 12 | Ad architecture, no ads shipped, no double rewards, no fake rewards | ✅ | `test_services` |
 | 13 | Modular architecture, single state model, signals, no duplicated rules | ✅ | `docs/ARCHITECTURE.md` |
-| 14 | Unit/logic/level tests listed in brief | ✅ | 91 tests incl. suspend/resume, repeated taps during animation, 31 200-action fuzz |
+| 14 | Unit/logic/level tests listed in brief | ✅ | 99 tests incl. suspend/resume, repeated taps during animation, 31 200-action fuzz |
 | 14 | Tutorial text accurately describes actual rules | 🟡 | Automated: each intro's promised mechanic exists on its level; every refusal reason has text; rules text covers every mechanic. Wording clarity needs a human playtest (`docs/PLAYTEST_PLAN.md`, not run) |
 | 14 | **Android: run on device/emulator, test touch/audio/persistence/navigation, inspect logs** | ❌ | Impossible in this environment; full procedure + empty results table in `docs/DEVICE_TEST_PLAN.md` |
 | 15 | Lightweight, no needless permissions, no input duplication | 🟡 | Manifest: 0 permissions; duplicate input guarded & tested; **no on-device perf measurement** |
@@ -188,6 +188,7 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 | 2026-10-16 | AAB attempt in scratch copy: stops at missing keystore; with throw-away key (deleted) stops at AGP resolution (`dl.google.com` 403) | blockers recorded in `docs/ANDROID.md` |
 | 2026-10-16 | New tests: tutorial-claims (+2), release-config guard (4), layout (5); APK dependency scan: no ad/analytics/network libs | **78/78**, validator 0 errors |
 | 2026-10-16 | **UI/UX improvement pass** (reviewer findings + own audit): contrast tokens (primary white-on-coral 2.80→4.58, soft text 4.33→5.57, switch labels 2.38→4.80), tray rule-tag badges, lock/ice status pills, Restart moved away from Hint, long toasts stay longer, board sits lower, menu spacers, staged reward animation; 4 aspect-ratio layout tests, intro-once and settings-persistence tests | **91/91**, validator 0 errors, APK target 36 / 0 permissions, 29 screens + PDF regenerated |
+| 2026-10-17 | **Second review pass:** baseline reproduced (91/91). Amber triangle: fill `#F5B400→#EAA600` + 50 %-darker thicker rim for that shape only (rim 5.1:1; checked in 6 states); tray outline token `#857D6C` 4 px (2.65→3.59:1). New tests: hint highlight persistence, Undo/Restart clear hints, stale hint never charged, confirmation double-press charges once, ≤ 1 coral primary per dialog, result dialogs non-dismissible, smallest slot ≥ 76 px on all 40 levels (measured 80), amber/tray contrast. Pause position and level-select indicators evaluated and deliberately unchanged | **99/99**, validator 0 errors, APK target 36 / 0 permissions, 29 screens + 23-page PDF regenerated |
 | 2026-10-16 | Rendering all 29 screens for the UI spec exposed 2 defects: splash logo mis-positioned, Settings dialog taller than the screen → fixed (`test_layout` +2) | **80/80**; spec written (`docs/UI_UX_DESIGN_SPEC.md`) incl. measured WCAG contrast gaps for review |
 
 Known historical bug to keep in mind: packed arrays stored inside an `Array` alias on assignment in Godot —

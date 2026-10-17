@@ -42,6 +42,6 @@ id  name               par   limit optimal mechanics
 39  Crosswinds         24    35    24     one-way, reserved, 3 locks, 2 ice
 40  The Last Slot      24    35    24     3 locks, 3 ice
 
-40 levels, 0 errors, 0 warnings, 48.0s
+40 levels, 0 errors, 0 warnings, 44.6s
 WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).
    at: cleanup (core/object/object.cpp:2536)

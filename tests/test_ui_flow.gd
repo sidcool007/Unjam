@@ -317,3 +317,167 @@ func test_intro_card_shows_once_then_never_interrupts_again() -> void:
 	await tree.process_frame
 	eq(_modal_count(), 0, "no interruption on later visits")
 	await _close()
+
+
+func _hint_flags(bv: BoardView) -> int:
+	var n := 0
+	for t in bv.trays:
+		if t.hint_target:
+			n += 1
+	return n
+
+
+func test_hint_highlight_persists_until_the_next_interaction() -> void:
+	await _open(2)
+	Progress.coins = 60
+	_screen._apply_hint(HintService.get_hint(_screen.session))
+	var bv := _screen.board_view
+	check(_hint_flags(bv) >= 1, "hint highlight shown")
+	for i in 40:
+		await tree.process_frame
+	check(_hint_flags(bv) >= 1, "still shown after 40 frames (no timeout)")
+	_screen._on_tray_tapped(0)     # any next interaction clears it
+	eq(_hint_flags(bv), 0, "cleared by the next tap")
+	await _close()
+
+
+func test_undo_and_restart_leave_no_stale_hint() -> void:
+	await _open(2)
+	Progress.coins = 90
+	var mv: Array = Levels.get_level(2)["solution"][0]
+	_screen._on_tray_tapped(mv[0])
+	_screen._on_tray_tapped(mv[1])
+	await _wait_idle()
+	_screen._apply_hint(HintService.get_hint(_screen.session))
+	check(_hint_flags(_screen.board_view) >= 1)
+	_screen._on_undo()
+	await _wait_idle()
+	eq(_hint_flags(_screen.board_view), 0, "undo clears the hint")
+	for ov in _screen.board_view.objs[mv[0]]:
+		eq((ov as ObjectView).scale, Vector2.ONE, "no object left pulsed")
+	_screen._apply_hint(HintService.get_hint(_screen.session))
+	check(_hint_flags(_screen.board_view) >= 1)
+	_screen.session.try_move(mv[0], mv[1])   # make restart meaningful
+	_screen._do_restart()
+	await _wait_idle()
+	eq(_hint_flags(_screen.board_view), 0, "restart clears the hint")
+	await _close()
+
+
+func test_stale_hint_is_never_charged() -> void:
+	await _open(2)
+	Progress.coins = 50
+	var stale := {"kind": HintService.Kind.MOVE, "from": 0, "to": 0, "message": ""}  # illegal now
+	_screen._apply_hint(stale)
+	eq(Progress.coins, 50, "an illegal/stale hint costs nothing")
+	eq(_hint_flags(_screen.board_view), 0, "and shows nothing")
+	await _close()
+
+
+func test_double_pressing_the_hint_confirmation_charges_once() -> void:
+	await _open(2)
+	Progress.coins = 60
+	_screen._on_hint()
+	await tree.process_frame
+	var modal: Modal = null
+	for ch in _screen.get_children():
+		if ch is Modal and not ch.is_queued_for_deletion():
+			modal = ch
+	check(modal != null, "confirmation dialog")
+	var btn: Button = modal._buttons.get_child(0)
+	btn.pressed.emit()
+	btn.pressed.emit()
+	eq(Progress.coins, 60 - Progress.HINT_COST, "charged exactly once")
+	await _close()
+
+
+func _primary_buttons(modal: Modal) -> int:
+	var n := 0
+	for b in modal.find_children("*", "Button", true, false):
+		var sb = (b as Button).get_theme_stylebox("normal")
+		if sb is StyleBoxFlat and (sb as StyleBoxFlat).bg_color.is_equal_approx(UI.ACCENT):
+			n += 1
+	return n
+
+
+func _top_modal() -> Modal:
+	var m: Modal = null
+	for ch in _screen.get_children():
+		if ch is Modal and not ch.is_queued_for_deletion():
+			m = ch
+	return m
+
+
+func _audit_top_dialog(name: String, expect_danger: bool = false) -> void:
+	var m := _top_modal()
+	check(m != null, "%s dialog opened" % name)
+	if m == null:
+		return
+	var primaries := _primary_buttons(m)
+	check(primaries <= 1, "%s dialog has %d coral primary buttons (max 1)" % [name, primaries])
+	if expect_danger:
+		var danger := false
+		for b in m.find_children("*", "Button", true, false):
+			var sb = (b as Button).get_theme_stylebox("normal")
+			if sb is StyleBoxFlat and (sb as StyleBoxFlat).bg_color.is_equal_approx(UI.DANGER):
+				danger = true
+		check(danger, "%s: the destructive action uses the danger style, not coral" % name)
+	m.close()
+
+
+func test_each_dialog_has_at_most_one_coral_primary_and_results_are_not_dismissible() -> void:
+	Progress.settings["reduce_motion"] = true
+	await _open(2)
+	Progress.coins = 90
+	_screen._on_pause()
+	await tree.process_frame
+	_audit_top_dialog("pause")
+	await tree.process_frame
+	_screen._show_rules()
+	await tree.process_frame
+	_audit_top_dialog("rules")
+	await tree.process_frame
+	_screen._on_hint()
+	await tree.process_frame
+	_audit_top_dialog("hint confirmation")
+	await tree.process_frame
+	Progress.coins = 3
+	_screen._on_hint()
+	await tree.process_frame
+	_audit_top_dialog("insufficient coins")
+	await tree.process_frame
+	Progress.coins = 90
+	var mv: Array = Levels.get_level(2)["solution"][0]
+	_screen._on_tray_tapped(mv[0])
+	_screen._on_tray_tapped(mv[1])
+	await _wait_idle()
+	_screen._on_restart()
+	await tree.process_frame
+	_audit_top_dialog("restart confirmation", true)
+	await _close()
+	Progress.settings["reduce_motion"] = false
+	# result dialogs: win and fail must not be dismissible and have one primary
+	await _open(1)
+	await _play_level1_to_win()
+	var win := _top_modal()
+	check(win != null and not win.dismissible, "win dialog is not dismissible")
+	check(win != null and _primary_buttons(win) <= 1, "win dialog has at most one primary")
+	await _close()
+	await _open(11)
+	var guard := 0
+	while _screen.session.status == GameSession.Status.PLAYING and guard < 80:
+		guard += 1
+		await _wait_idle()
+		var lm: Array = _screen.session.board.legal_moves()
+		if lm.is_empty():
+			break
+		var m2: Array = lm[guard % lm.size()]
+		_screen._on_tray_tapped(m2[0])
+		_screen._on_tray_tapped(m2[1])
+	await _wait_idle()
+	for i in 4:
+		await tree.process_frame
+	var fail := _top_modal()
+	check(fail != null and not fail.dismissible, "fail dialog is not dismissible")
+	check(fail != null and _primary_buttons(fail) <= 1, "fail dialog has at most one primary")
+	await _close()

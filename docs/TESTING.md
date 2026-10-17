@@ -10,7 +10,7 @@ godot --headless --path . --script res://tools/validate_levels.gd # exhaustive l
 frames. UI tests drive the real `GameScreen` with taps.
 
 ### Latest results (Godot 4.7.1.stable, 2026-10-16; also green on 4.6 and 4.3)
-* **91 tests, 91 passed, 0 failed** (exit code 0)
+* **99 tests, 99 passed, 0 failed** (exit code 0)
   * `test_board_rules` (14): legal/illegal moves, match rule, full trays, clear rule,
     reserved & one-way trays, locks (unlock on clear), ice (thaw by move count), move
     limit failure, deadlock failure, exact undo, undo after failure, restart, clone independence.
@@ -34,11 +34,12 @@ frames. UI tests drive the real `GameScreen` with taps.
     vs `check_move`, blocked objects never pickable); win on the final allowed move; undo across clears/locks/ice.
   * `test_ui_fuzz` (4): random taps (also hammering during animations), undo, restart, hint and pause on 7
     levels; after every idle point the view must mirror the model exactly (objects, positions, highlights, dialogs).
-  * `test_layout` (9): safe-area/cutout arithmetic, responsive column, splash centred, dialogs fit, rule tags never collide with the tray above, board + action buttons + trays fit on 5:3, 16:9, 20:9 and 21:9 windows with ≥96 px buttons and no overlapping trays (SIMULATED geometry, not a device).
-  * `test_contrast` (4): WCAG ratios of the real design tokens (text ≥ 4.5:1, coral graphics ≥ 3:1, tray outline ≥ 2.5:1, every object rim ≥ 2.0:1 on the tray).
+  * `test_layout` (10, incl. smallest slot ≥ 76 px on every level): safe-area/cutout arithmetic, responsive column, splash centred, dialogs fit, rule tags never collide with the tray above, board + action buttons + trays fit on 5:3, 16:9, 20:9 and 21:9 windows with ≥96 px buttons and no overlapping trays (SIMULATED geometry, not a device).
+  * `test_contrast` (6): WCAG ratios of the real design tokens (text ≥ 4.5:1, coral graphics ≥ 3:1, tray outline ≥ 3:1, every object rim ≥ 3:1 on the tray, amber triangle improved but still amber and distinct from the orange cross, only amber gets the thicker rim).
   * `test_release_config` (4): identity/version consistent across presets and project, 0 permissions, no credentials in tracked config, AAB preset sane.
   * `test_campaign` also checks that each intro card's promised mechanic really exists on the level that shows it (+2 tests).
   * `test_ui_flow` also covers: reward animation ends on the exact values, Reduce motion shows them at once, Restart is not adjacent to Hint, intro cards show once and never again, double-pressed dialog buttons run once.
+  * `test_ui_flow` (18) additionally proves: hint highlight persists until the next interaction; Undo/Restart leave no stale hint; a stale/illegal hint is never charged; double-pressing the hint confirmation charges once; each dialog has ≤ 1 coral primary and the destructive restart uses the danger style; win/fail dialogs are not dismissible.
   * `test_progress` also covers all three settings persisting across a restart.
   * `test_services` (4): ad gate grants at most once, never without a request, never faked;
     audio safe with unknown/disabled sounds.

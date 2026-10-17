@@ -7,6 +7,7 @@ const BG := Color("f3f0ea")
 const BG_DARK := Color("e7e2d8")
 const PANEL := Color("ffffff")
 const TRAY := Color("e1dccf")
+const TRAY_OUTLINE := Color("857d6c")  # tray boundary: 3.59:1 on BG (WCAG 3:1 for graphical parts)
 const TRAY_EDGE := Color("9c9482")  # 2.65:1 on BG (was 1.47): the tray outline must be visible
 const INK := Color("2b2f4a")
 const INK_SOFT := Color("5a5e7a")  # 5.57:1 on BG (was 4.33)
@@ -22,9 +23,14 @@ const SWITCH_OFF := Color("756e5d")  # white "OFF" label 4.9:1
 
 ## Object palette: one colour AND one distinct shape per type (non-colour cue).
 const TYPE_COLORS := [
-	Color("ef5b5b"), Color("2e9be6"), Color("f5b400"), Color("2fbf71"),
+	Color("ef5b5b"), Color("2e9be6"), Color("eaa600"), Color("2fbf71"),
 	Color("8e5cf5"), Color("f06bb5"), Color("10a9a0"), Color("f2792b"),
 ]
+## Per-type rim: how much darker the outline is and how much of the radius the fill keeps.
+## The amber triangle is the weakest fill on the tray (1.46:1), so it gets a darker, thicker rim (5.1:1)
+## instead of darkening every shape.
+const RIM_DARKEN := [0.36, 0.36, 0.50, 0.36, 0.36, 0.36, 0.36, 0.36]
+const RIM_INSET := [0.88, 0.88, 0.80, 0.88, 0.88, 0.88, 0.88, 0.88]
 const SHAPE_NAMES := ["circle", "square", "triangle", "hexagon", "diamond", "star", "pentagon", "cross"]
 
 const SCALE_FONT_TITLE := 64

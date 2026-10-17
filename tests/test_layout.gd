@@ -206,3 +206,33 @@ func test_board_and_controls_fit_short_standard_and_tall_phones() -> void:
 	tree.root.size = Vector2i(720, 1280)
 	stub.queue_free()
 	await tree.process_frame
+
+
+func test_slot_size_never_drops_below_a_legible_minimum_on_any_level() -> void:
+	# Tags (0.31 x slot radius) and status pills (0.38 x slot tall) stay legible only if slots stay large.
+	tree.root.size = Vector2i(720, 1280)
+	await tree.process_frame
+	Progress.save_path = "user://test_layout_save.json"
+	Progress.level_count = Levels.count()
+	Progress.reset_all()
+	Progress.tutorial_done = true
+	Progress.highest_unlocked = 40
+	var seen := {}
+	for i in range(1, 41):
+		seen[i] = true
+	Progress.seen_intros = seen
+	var stub = load("res://tests/stub_main.gd").new()
+	tree.root.add_child(stub)
+	var smallest := 999.0
+	for id in range(1, 41):
+		var s := GameScreen.new()
+		s.main = stub
+		s.level_id = id
+		tree.root.add_child(s)
+		for i in 3:
+			await tree.process_frame
+		smallest = minf(smallest, s.board_view._slot)
+		s.queue_free()
+		await tree.process_frame
+	check(smallest >= 76.0, "smallest slot over all 40 levels is %.1f logical px (need >= 76)" % smallest)
+	stub.queue_free()
