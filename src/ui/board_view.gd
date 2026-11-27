@@ -207,6 +207,15 @@ func _tween_to(node: Control, pos: Vector2, dur: float) -> void:
 
 
 ## True when no move/shake/lift tween is still running on any tray or object.
+## Repaints every tray and object (e.g. after the palette setting changed).
+func redraw_all() -> void:
+	for t in trays:
+		t.queue_redraw()
+	for list in objs:
+		for ov in list:
+			(ov as Control).queue_redraw()
+
+
 func settled() -> bool:
 	if busy:
 		return false

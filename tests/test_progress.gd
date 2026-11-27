@@ -238,11 +238,14 @@ func test_all_settings_persist_across_restart() -> void:
 	p.settings["sound"] = false
 	p.settings["music"] = false
 	p.settings["reduce_motion"] = true
+	p.settings["colorblind"] = true
 	check(p.save())
 	var q = _new_progress()
 	q.load_data()
 	eq(q.settings["sound"], false)
 	eq(q.settings["music"], false)
 	eq(q.settings["reduce_motion"], true)
+	eq(q.settings["colorblind"], true)
 	p.free()
 	q.free()
+	UI.colorblind = false

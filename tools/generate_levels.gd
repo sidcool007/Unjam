@@ -5,7 +5,9 @@ extends SceneTree
 ## solution length inside the spec's difficulty band. Output is frozen JSON;
 ## nothing is generated at runtime.
 ##
-##   godot --headless --path . --script res://tools/generate_levels.gd [-- first last]
+##   godot --headless --path . --script res://tools/generate_levels.gd [-- first last [out.json]]
+## With an out path only the generated levels are written there (existing levels are never rewritten);
+## merge them into levels/campaign.json by appending the lines.
 
 const Specs = preload("res://tools/level_specs.gd")
 
@@ -25,29 +27,41 @@ func _init() -> void:
 		if d is Dictionary:
 			for lv in d["levels"]:
 				existing[int(lv["id"])] = lv
+	var out_path := "res://levels/campaign.json" if args.size() < 3 else args[2]
+	var only_new := args.size() >= 3
 	var levels: Array = []
 	for i in specs.size():
 		var id := i + 1
 		if id < first or id > last:
+			if only_new:
+				continue
 			if existing.has(id):
 				levels.append(existing[id])
 			continue
 		var t0 := Time.get_ticks_msec()
 		var lv := _make_level(id, specs[i])
+		var widen := 0
+		while lv.is_empty() and widen < 3:
+			widen += 1  # relax the difficulty band a little and retry rather than abort the whole run
+			var relaxed: Dictionary = (specs[i] as Dictionary).duplicate()
+			relaxed["lo"] = maxi(4, int(relaxed["lo"]) - 2 * widen)
+			relaxed["hi"] = int(relaxed["hi"]) + 3 * widen
+			printerr("level %d: no layout in band, retrying with lo=%d hi=%d" % [id, relaxed["lo"], relaxed["hi"]])
+			lv = _make_level(id, relaxed)
 		if lv.is_empty():
 			printerr("FAILED to generate level %d (%s)" % [id, specs[i]["name"]])
 			quit(1)
 			return
 		print("level %2d %-18s seed=%d opt=%d moves_limit=%d  %dms" % [id, lv["name"], lv["seed"], lv["par"], lv.get("max_moves", 0), Time.get_ticks_msec() - t0])
 		levels.append(lv)
-		_write(levels)  # incremental: a crash or timeout never loses finished levels
-	_write(levels)
+		_write(levels, out_path)  # incremental: a crash or timeout never loses finished levels
+	_write(levels, out_path)
 	print("wrote %d levels" % levels.size())
 	quit(0)
 
 
-func _write(levels: Array) -> void:
-	var out := FileAccess.open("res://levels/campaign.json", FileAccess.WRITE)
+func _write(levels: Array, path: String) -> void:
+	var out := FileAccess.open(path, FileAccess.WRITE)
 	out.store_string(_pretty(levels))
 	out.close()
 

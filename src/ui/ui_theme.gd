@@ -31,6 +31,16 @@ const TYPE_COLORS := [
 ## instead of darkening every shape.
 const RIM_DARKEN := [0.36, 0.36, 0.50, 0.36, 0.36, 0.36, 0.36, 0.36]
 const RIM_INSET := [0.88, 0.88, 0.80, 0.88, 0.88, 0.88, 0.88, 0.88]
+## Colour-blind-safe palette (Okabe-Ito based, tuned with protan/deutan/tritan simulation: the five
+## types used by the levels stay >= 28 dE apart under all three; see tests/test_contrast.gd).
+## Light fills (sky, yellow) get a darker, thicker rim so they still read on the tray.
+const CB_COLORS := [
+	Color("d55e00"), Color("8fd3ff"), Color("e8d500"), Color("00936b"),
+	Color("0b3fa8"), Color("cc79a7"), Color("e69f00"), Color("5b6472"),
+]
+const CB_RIM_DARKEN := [0.36, 0.58, 0.55, 0.36, 0.30, 0.36, 0.45, 0.36]
+const CB_RIM_INSET := [0.88, 0.80, 0.80, 0.88, 0.88, 0.88, 0.84, 0.88]
+static var colorblind := false  # mirrored from Progress.settings["colorblind"]
 const SHAPE_NAMES := ["circle", "square", "triangle", "hexagon", "diamond", "star", "pentagon", "cross"]
 
 const SCALE_FONT_TITLE := 64
@@ -51,6 +61,18 @@ static func bold() -> Font:
 		_bold.base_font = ThemeDB.fallback_font
 		_bold.variation_embolden = 0.55
 	return _bold
+
+
+static func type_color(i: int) -> Color:
+	return (CB_COLORS if colorblind else TYPE_COLORS)[i % TYPE_COLORS.size()]
+
+
+static func rim_darken(i: int) -> float:
+	return (CB_RIM_DARKEN if colorblind else RIM_DARKEN)[i % TYPE_COLORS.size()]
+
+
+static func rim_inset(i: int) -> float:
+	return (CB_RIM_INSET if colorblind else RIM_INSET)[i % TYPE_COLORS.size()]
 
 
 static func box(color: Color, radius: int = 24, border: Color = Color(0, 0, 0, 0), border_w: int = 0, shadow: bool = false) -> StyleBoxFlat:

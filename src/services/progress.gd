@@ -22,7 +22,7 @@ var current_level := 1
 var completed := {}  # level id (int) -> best stars (1..3)
 var tutorial_done := false
 var seen_intros := {}  # level id (int) -> true
-var settings := {"sound": true, "music": true, "reduce_motion": false}
+var settings := {"sound": true, "music": true, "reduce_motion": false, "colorblind": false}
 var session: Variant = null  # saved in-progress session dict or null
 var load_status := "new"  # new | ok | recovered_backup | reset_corrupt
 
@@ -146,8 +146,14 @@ func set_tutorial_done() -> void:
 func set_setting(key: String, value: bool) -> void:
 	if settings.has(key):
 		settings[key] = value
+		_sync_ui_flags()
 		save()
 		settings_changed.emit()
+
+
+## Mirrors display settings into the static UI tokens (palette choice).
+func _sync_ui_flags() -> void:
+	UI.colorblind = bool(settings.get("colorblind", false))
 
 
 func save_session(d: Variant) -> void:
@@ -178,8 +184,9 @@ func _set_defaults() -> void:
 	completed = {}
 	tutorial_done = false
 	seen_intros = {}
-	settings = {"sound": true, "music": true, "reduce_motion": false}
+	settings = {"sound": true, "music": true, "reduce_motion": false, "colorblind": false}
 	session = null
+	_sync_ui_flags()
 
 
 func to_dict() -> Dictionary:
@@ -242,6 +249,7 @@ func apply_dict(d: Variant) -> bool:
 		for k in settings.keys():
 			if st.get(k) is bool:
 				settings[k] = st[k]
+	_sync_ui_flags()
 	if d.get("session") is Dictionary:
 		session = d["session"]  # structurally verified by GameSession.restore_from
 	return true

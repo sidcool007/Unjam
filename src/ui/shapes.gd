@@ -38,11 +38,11 @@ static func polygon_points(shape: String, c: Vector2, r: float) -> PackedVector2
 ## Draws one game object (body, rim, sheen) centred at c with radius r.
 static func draw_object(ci: CanvasItem, type: int, c: Vector2, r: float, alpha: float = 1.0) -> void:
 	var ti := type % UI.TYPE_COLORS.size()
-	var col: Color = UI.TYPE_COLORS[ti]
+	var col: Color = UI.type_color(ti)
 	col.a = alpha
-	var dark := col.darkened(UI.RIM_DARKEN[ti])
+	var dark := col.darkened(UI.rim_darken(ti))
 	dark.a = alpha
-	var inset: float = UI.RIM_INSET[ti]
+	var inset: float = UI.rim_inset(ti)
 	var light := col.lightened(0.38)
 	light.a = alpha * 0.85
 	var shape: String = UI.SHAPE_NAMES[ti]

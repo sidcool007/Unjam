@@ -15,7 +15,7 @@
 |------|-------|
 | Overall | **Release candidate, desktop-verified, API-36 build. Not device-verified. Not release-signed.** |
 | Gameplay | Complete: 40 levels, 7 mechanic stages, tutorial, undo/restart/hints/coins/save |
-| Automated tests | **101 / 101 pass** (exit 0): rules, 31 200-action fuzz, UI fuzz, save/economy, hints, campaign, layout (4 phone aspect ratios)/safe-area maths, **contrast tokens**, release-config guard, ad gate |
+| Automated tests | **105 / 105 pass** (exit 0): rules, 31 200-action fuzz, UI fuzz, save/economy, hints, campaign, layout (4 phone aspect ratios)/safe-area maths, **contrast tokens**, release-config guard, ad gate |
 | Level validator | **40 levels, 0 errors, 0 warnings** (exit 0); every recorded solution proven shortest by exhaustive search |
 | Debug APK | `build/unjam-debug.apk` (57 133 192 B, git-ignored): **targetSdkVersion 36**, compileSdk 36, min SDK 24, arm64-v8a + x86_64, portrait, **0 permissions**, v2+v3 signature OK (debug key). |
 | Google Play target-API rule | Official page (read 2026-10-16): new apps/updates from 31 Aug 2026 must target **API 36**. **Met by the APK** (was *not* met at target 35 — fixed by Godot 4.6 → 4.7.1). |
@@ -24,6 +24,7 @@
 | Play listing assets | Icon 512, feature graphic, 6 screenshots in `store/` (rendered by the game on desktop GL, not device captures) |
 | UI/UX improvement pass (2 rounds) | **VERIFIED** (tests + re-rendered 29 screens): WCAG contrast fixed and locked by tests; amber triangle (deeper fill, 5.1:1 rim) and 3.59:1 tray outline; hint-state, dialog-hierarchy and minimum-slot-size tests; tray rule tags; lock/ice status pills; action-bar order; reward animation; layout on 5:3 / 16:9 / 20:9 / 21:9 windows. Open items listed in `docs/UI_UX_DESIGN_SPEC.md` §13 |
 | CI + emulator pipeline | **IMPLEMENTED, NOT VERIFIED** (`docs/CI.md`): GitHub Actions run tests, validator, debug APK + target-36/zero-permission check, and an Android-emulator end-to-end self-test (2 device configs incl. low-end + cutout overlay) with screenshots/logcat artifacts; manual signed-AAB workflow. Could not be executed from this environment; parts verified locally. First real run happens on GitHub |
+| Colour-blind palette (Settings → Colour-blind colours) | **VERIFIED** by simulation tests: the 5 level types stay ≥ 25 ΔE apart under protan, deutan and tritan (measured ≥ 28); default palette is clearly weaker (red/green ΔE ≈ 12 under deuteranopia). Visual evidence: `docs/design/sheets/sheet_5_colour_blind_palette.png`. Not yet seen by colour-blind players |
 | Compliance drafts | Privacy policy + Play Console prep drafted (`store/`), **nothing submitted**, owner fields/decisions open |
 | Store readiness | **Not ready** — see §8 |
 
@@ -60,7 +61,7 @@
 
 ```bash
 godot --headless --path . --import                                   # once / after file changes
-godot --headless --path . --script res://tests/test_runner.gd        # expect: 101 tests, 101 passed; exit 0
+godot --headless --path . --script res://tests/test_runner.gd        # expect: 105 tests, 105 passed; exit 0
 godot --headless --path . --script res://tools/validate_levels.gd    # expect: 40 levels, 0 errors, 0 warnings; exit 0
 godot --headless --path . --export-debug "Android Debug" build/unjam-debug.apk
 aapt dump badging build/unjam-debug.apk | grep -E "targetSdk|uses-permission"   # expect target 36, no permissions
@@ -114,7 +115,7 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 | 11 | Save: unlocks, completed, current level, coins, settings, tutorial, active session; validated; corrupt-safe; save at transitions | ✅ | `test_progress` (round trip, corruption, backup, sanitising, suspend flush, session restore) |
 | 12 | Ad architecture, no ads shipped, no double rewards, no fake rewards | ✅ | `test_services` |
 | 13 | Modular architecture, single state model, signals, no duplicated rules | ✅ | `docs/ARCHITECTURE.md` |
-| 14 | Unit/logic/level tests listed in brief | ✅ | 101 tests incl. suspend/resume, repeated taps during animation, 31 200-action fuzz |
+| 14 | Unit/logic/level tests listed in brief | ✅ | 105 tests incl. suspend/resume, repeated taps during animation, 31 200-action fuzz |
 | 14 | Tutorial text accurately describes actual rules | 🟡 | Automated: each intro's promised mechanic exists on its level; every refusal reason has text; rules text covers every mechanic. Wording clarity needs a human playtest (`docs/PLAYTEST_PLAN.md`, not run) |
 | 14 | **Android: run on device/emulator, test touch/audio/persistence/navigation, inspect logs** | ❌ | Impossible in this environment; full procedure + empty results table in `docs/DEVICE_TEST_PLAN.md` |
 | 15 | Lightweight, no needless permissions, no input duplication | 🟡 | Manifest: 0 permissions; duplicate input guarded & tested; **no on-device perf measurement** |

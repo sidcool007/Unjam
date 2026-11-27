@@ -52,3 +52,7 @@ tray outline token 3.59:1. Tests added for hint-state, dialog hierarchy, result-
 ## CI batch (2026-11-27)
 Reinstalled toolchain after a container reset (baseline 99/99). Added debug-only on-device autotest, CI scripts/workflows (docs/CI.md), runner hardening (broken test file = failure, not hang).
 101/101 locally; GitHub Actions workflows IMPLEMENTED, NOT VERIFIED until their first run.
+
+## Colour-blind palette (2026-11-27)
+Okabe-Ito based palette tuned by CVD simulation (min dE >= 28 for the 5 level types under protan/deutan/tritan; default palette red/green dE ~12 under deuteranopia).
+Setting `colorblind` (persisted, validated), live redraw, 4 new tests (105/105). Evidence sheet_5. Settings dialog gained one row.

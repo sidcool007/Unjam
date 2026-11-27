@@ -36,7 +36,9 @@ func _ready() -> void:
 	board_view.tray_tapped.connect(_on_tray_tapped)
 	board_view.busy_changed.connect(_on_busy_changed)
 	Progress.coins_changed.connect(func(_c): _update_hud())
-	Progress.settings_changed.connect(func(): board_view.reduce_motion = bool(Progress.settings["reduce_motion"]))
+	Progress.settings_changed.connect(func():
+		board_view.reduce_motion = bool(Progress.settings["reduce_motion"])
+		board_view.redraw_all())
 	Progress.set_current_level(level_id)
 	_update_hud()
 	_tutorial = level_id == 1 and not Progress.tutorial_done
