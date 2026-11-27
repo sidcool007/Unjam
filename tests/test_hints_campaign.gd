@@ -35,3 +35,34 @@ func test_following_hints_wins_every_level() -> void:
 	print("      worst first-hint time: %d ms (level %d)" % [worst_ms, worst_level])
 	check(worst_ms <= MAX_FIRST_HINT_MS, "first hint took %d ms on level %d" % [worst_ms, worst_level])
 	lib.free()
+
+
+func test_hints_work_after_leaving_the_authored_path() -> void:
+	# A player who deviates from the recorded solution must still get a prompt, legal, useful hint.
+	var lib: Node = load("res://src/core/level_library.gd").new()
+	lib.load_campaign("res://levels/campaign.json")
+	var worst := 0
+	var worst_level := 0
+	for lv in lib.levels:
+		var s := GameSession.new(lv)
+		var sol: Array = lv["solution"]
+		var moved := false
+		for mv in s.board.legal_moves():
+			if mv != [int(sol[0][0]), int(sol[0][1])]:
+				s.try_move(mv[0], mv[1])
+				moved = true
+				break
+		if not moved or s.status != GameSession.Status.PLAYING:
+			continue
+		var t0 := Time.get_ticks_msec()
+		var h := HintService.get_hint(s)
+		var dt := Time.get_ticks_msec() - t0
+		if dt > worst:
+			worst = dt
+			worst_level = lv["id"]
+		check(h["kind"] != HintService.Kind.UNAVAILABLE, "level %d: no hint after leaving the authored path" % lv["id"])
+		if h["kind"] == HintService.Kind.MOVE:
+			check(s.board.check_move(h["from"], h["to"]) == BoardState.Reason.OK, "level %d: illegal hint off-path" % lv["id"])
+	print("      worst off-path hint time: %d ms (level %d)" % [worst, worst_level])
+	check(worst <= 5000, "off-path hint took %d ms on level %d" % [worst, worst_level])
+	lib.free()
