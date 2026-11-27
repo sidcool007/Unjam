@@ -6,7 +6,8 @@ extends RefCounted
 ## still on that path. A move is only recommended if check_move() accepts it.
 
 ## A hint must feel instant: the live search is capped, then the authored solution takes over.
-const SEARCH_MAX_MS := 900
+const SEARCH_MAX_MS := 1200
+const REWIND_MESSAGE := "No hint for this position. Undo a few moves to get back on a path known to work. You weren't charged."
 
 enum Kind { MOVE, UNSOLVABLE, UNAVAILABLE }
 
@@ -25,15 +26,18 @@ static func get_hint(session: GameSession) -> Dictionary:
 			return {"kind": Kind.MOVE, "from": int(amv[0]), "to": int(amv[1]), "message": ""}
 	# 2) Off the authored path: search the real rules from the current board (time-capped),
 	#    then a greedier pass; a hint must always feel instant.
-	for pass_cfg in [[40000, 3.0, SEARCH_MAX_MS], [60000, 8.0, SEARCH_MAX_MS * 3]]:
-		var res := Solver.solve_fast(b, pass_cfg[0], pass_cfg[1], pass_cfg[2])
-		if res["found"]:
-			var mv: Array = res["moves"][0]
-			if b.check_move(mv[0], mv[1]) == BoardState.Reason.OK:
-				return {"kind": Kind.MOVE, "from": mv[0], "to": mv[1], "message": ""}
-		elif res["exhausted"]:
-			return {"kind": Kind.UNSOLVABLE,
-				"message": "This arrangement can't be finished any more. Undo a few moves or restart."}
+	var res := Solver.solve_fast(b, 40000, 3.0, SEARCH_MAX_MS)
+	if res["found"]:
+		var mv: Array = res["moves"][0]
+		if b.check_move(mv[0], mv[1]) == BoardState.Reason.OK:
+			return {"kind": Kind.MOVE, "from": mv[0], "to": mv[1], "message": ""}
+	elif res["exhausted"]:
+		return {"kind": Kind.UNSOLVABLE,
+			"message": "This arrangement can't be finished any more. Undo a few moves or restart."}
+	# 3) Search ran out of time: say how far back the player must undo to be on the authored path again.
+	var back := _rewind_to_authored(session, sol)
+	if back > 0:
+		return {"kind": Kind.UNAVAILABLE, "message": REWIND_MESSAGE, "rewind": back}
 	return _none("No reliable hint is available for this position. Try Undo or Restart. You weren't charged.")
 
 
@@ -44,6 +48,25 @@ static func _on_authored_path(session: GameSession, sol: Array) -> bool:
 			return false
 		probe.apply_move(int(sol[i][0]), int(sol[i][1]))
 	return probe.snapshot() == session.board.snapshot()
+
+
+## Number of undos that bring the player back onto the authored solution (0 if none/unknown).
+static func _rewind_to_authored(session: GameSession, sol: Array) -> int:
+	var hist := session.history
+	if hist.is_empty():
+		return 0
+	var probe := BoardState.from_level(session.level)
+	var snaps: Array = [probe.snapshot()]
+	for mv in sol:
+		probe.apply_move(int(mv[0]), int(mv[1]))
+		snaps.append(probe.snapshot())
+	var offset := session.board.moves - hist.size()  # moves made before the retained history window
+	if offset != 0:
+		return 0
+	for i in range(hist.size() - 1, -1, -1):
+		if i < snaps.size() and hist[i] == snaps[i]:
+			return hist.size() - i
+	return 0
 
 
 static func _none(msg: String) -> Dictionary:

@@ -60,9 +60,16 @@ func test_hints_work_after_leaving_the_authored_path() -> void:
 		if dt > worst:
 			worst = dt
 			worst_level = lv["id"]
-		check(h["kind"] != HintService.Kind.UNAVAILABLE, "level %d: no hint after leaving the authored path" % lv["id"])
+		check(h["kind"] != HintService.Kind.UNAVAILABLE or int(h.get("rewind", 0)) > 0, "level %d: neither a hint nor a rewind instruction off the authored path" % lv["id"])
+		if h["kind"] == HintService.Kind.UNAVAILABLE:
+			# the rewind instruction must be true: undoing that many moves puts the player back on the authored path
+			var n := int(h["rewind"])
+			for k in n:
+				s.undo()
+			check(HintService._on_authored_path(s, sol), "level %d: rewind of %d does not reach the authored path" % [lv["id"], n])
+			continue
 		if h["kind"] == HintService.Kind.MOVE:
 			check(s.board.check_move(h["from"], h["to"]) == BoardState.Reason.OK, "level %d: illegal hint off-path" % lv["id"])
 	print("      worst off-path hint time: %d ms (level %d)" % [worst, worst_level])
-	check(worst <= 5000, "off-path hint took %d ms on level %d" % [worst, worst_level])
+	check(worst <= 2500, "off-path hint took %d ms on level %d" % [worst, worst_level])
 	lib.free()

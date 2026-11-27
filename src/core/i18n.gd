@@ -91,6 +91,7 @@ const HI := {
 	"Not enough coins.": "सिक्के पर्याप्त नहीं हैं।",
 	"This arrangement can't be finished any more. Undo a few moves or restart.": "यह व्यवस्था अब पूरी नहीं हो सकती। कुछ चालें पूर्ववत करें या फिर शुरू करें।",
 	"No reliable hint is available for this position. Try Undo or Restart. You weren't charged.": "इस स्थिति के लिए भरोसेमंद संकेत उपलब्ध नहीं है। पूर्ववत या फिर शुरू आज़माएँ। आपके सिक्के नहीं कटे।",
+	"No hint for this position. Undo a few moves to get back on a path known to work. You weren't charged.": "इस स्थिति के लिए कोई संकेत नहीं। कुछ चालें पूर्ववत करके उस रास्ते पर लौटें जो सही माना गया है। आपके सिक्के नहीं कटे।",
 	"Paused": "रुका हुआ",
 	"Resume": "जारी रखें",
 	"How to play": "कैसे खेलें",
