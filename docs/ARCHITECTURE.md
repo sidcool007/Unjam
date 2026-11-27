@@ -17,7 +17,8 @@ src/services/  (autoloads except the provider interface)
 src/ui/        screens built in code: main (host), splash, menu, level select,
                game (HUD + flows), credits; components: board/tray/object views,
                modal, icon button, toggle row, settings panel, vector icons/shapes
-levels/campaign.json   40 levels (data only)
+levels/campaign.json   80 levels (data only)
+levels/daily.json      112 daily puzzles (data only; picked by date, weekday = difficulty tier)
 tools/         level generator, validator CLI, icon rasteriser (dev only)
 tests/         headless test runner + test files
 ```

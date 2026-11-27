@@ -14,9 +14,9 @@
 | Item | State |
 |------|-------|
 | Overall | **Release candidate, desktop-verified, API-36 build. Not device-verified. Not release-signed.** |
-| Gameplay | Complete: 40 levels, 7 mechanic stages, tutorial, undo/restart/hints/coins/save |
-| Automated tests | **105 / 105 pass** (exit 0): rules, 31 200-action fuzz, UI fuzz, save/economy, hints, campaign, layout (4 phone aspect ratios)/safe-area maths, **contrast tokens**, release-config guard, ad gate |
-| Level validator | **40 levels, 0 errors, 0 warnings** (exit 0); every recorded solution proven shortest by exhaustive search |
+| Gameplay | Complete: 80 levels in 10 stages, **daily puzzle** (112 pre-verified puzzles, weekday difficulty ramp, streak, no coins), tutorial, undo/restart/hints/coins/save, English + Hindi (Hindi machine-drafted, needs native review; glyph rendering NOT verified) |
+| Automated tests | **120 / 120 pass** (exit 0): rules, daily puzzle, localisation, off-path hints, 31 200-action fuzz, UI fuzz, save/economy, hints, campaign, layout (4 phone aspect ratios)/safe-area maths, **contrast tokens**, release-config guard, ad gate |
+| Level validator | **80 levels, 0 errors, 0 warnings** (exit 0); every recorded solution proven shortest by exhaustive search (daily pool: structural + solution-replay validation in `test_daily`) |
 | Debug APK | `build/unjam-debug.apk` (57 133 192 B, git-ignored): **targetSdkVersion 36**, compileSdk 36, min SDK 24, arm64-v8a + x86_64, portrait, **0 permissions**, v2+v3 signature OK (debug key). |
 | Google Play target-API rule | Official page (read 2026-10-16): new apps/updates from 31 Aug 2026 must target **API 36**. **Met by the APK** (was *not* met at target 35 — fixed by Godot 4.6 → 4.7.1). |
 | Real device / emulator run | **Never done** — none available (`adb devices` empty, no KVM) → `docs/DEVICE_TEST_PLAN.md`, all NOT RUN |
@@ -48,7 +48,7 @@
 | `src/services/audio.gd` | Autoload `Audio`: synthesised SFX + music loop |
 | `src/services/ad_service.gd`, `rewarded_ad_provider.gd` | Autoload `Ads` gate + provider interface (no provider ships) |
 | `src/ui/*` | Screens (built in code) and components (incl. `column_margin.gd`: responsive column + safe area); `scenes/main.tscn` is the only scene |
-| `levels/campaign.json` | **The level data** (40 levels) |
+| `levels/campaign.json` | **The level data** (80 levels) · `levels/daily.json` (112 daily puzzles) |
 | `ci/`, `.github/workflows/` | CI scripts and workflows (`docs/CI.md`); `src/services/autotest.gd` is the debug-only on-device self-test |
 | `tools/` | `generate_levels.gd`, `level_specs.gd`, `validate_levels.gd`, `make_icons.gd`, `make_store_assets.gd` (dev only) |
 | `store/` | Play listing assets + `PRIVACY_POLICY.md` (draft) + `PLAY_CONSOLE_PREP.md`; `.gdignore`d, never shipped in the APK |
@@ -62,7 +62,7 @@
 ```bash
 godot --headless --path . --import                                   # once / after file changes
 godot --headless --path . --script res://tests/test_runner.gd        # expect: 105 tests, 105 passed; exit 0
-godot --headless --path . --script res://tools/validate_levels.gd    # expect: 40 levels, 0 errors, 0 warnings; exit 0
+godot --headless --path . --script res://tools/validate_levels.gd    # expect: 80 levels, 0 errors, 0 warnings; exit 0
 godot --headless --path . --export-debug "Android Debug" build/unjam-debug.apk
 aapt dump badging build/unjam-debug.apk | grep -E "targetSdk|uses-permission"   # expect target 36, no permissions
 apksigner verify --verbose build/unjam-debug.apk
@@ -107,7 +107,7 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 | 6 | **30–50 levels, every one with a verified solution** | ✅ | 40 levels; exhaustive BFS proof per level (`docs/validation_report.txt`) |
 | 6 | Validator: counts, impossible states, capacity, reachability, duplicates, diagnostics | ✅ | `level_validator.gd`, `validate_levels.gd`, `test_campaign` (incl. negative cases) |
 | 7 | Coins, hints cost, no negative balance, rewards exactly once | ✅ | `test_progress`, `test_ui_flow` (double win callback pays once) |
-| 8 | Hint = legal next move, no charge when none, explanation, deterministic fallback | ✅ | `HintService`; hint-following wins all 40 levels (≈80 ms worst, desktop) |
+| 8 | Hint = legal next move, no charge when none, explanation, deterministic fallback | ✅ | `HintService` (authored path first, then 1.2 s capped search, else a truthful "undo N" instruction); hint-following wins all 80 levels (≈80 ms worst, desktop) |
 | 9 | Premium original UI; all 10 required screens | ✅ | Splash, menu, level select, tutorial (coach + intro cards), gameplay, pause/settings, complete, failed, hint/recovery dialog, privacy+credits — screenshots inspected |
 | 9 | HUD: level, moves/remaining, coins, undo, hint, restart, pause; menu progress indicator | ✅ | `GameScreen`, `MenuScreen` |
 | 9 | Responsive portrait, ≥48 dp targets, readable text, non-colour cues, reduce-motion | 🟡 | Contrast enforced by `test_contrast` (text ≥ 4.5:1, coral graphics ≥ 3:1). Rendered at 720×1280, 720×1560, 540×960 and landscape/tablet 1280×720, 1200×1920 (centred column); safe-area maths unit-tested (`test_layout`); **real cutout/OS values untested**; **TalkBack impossible on Godot 4.7.1 (no Android accessibility server)** |
@@ -132,7 +132,7 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 |------:|:------:|-------|
 | 1 Playable prototype | ✅ | Level 1 with final rules. A critical re-review (Phase-1 review) later found and fixed 6 UI defects (§9) |
 | 2 Foundation | ✅ | Engine, level format, save, hints, solver, tests |
-| 3 Campaign | ✅ | 40 verified levels; generator is a dev tool, results frozen as data |
+| 3 Campaign | ✅ | 80 verified levels + daily pool; generator is a dev tool, results frozen as data |
 | 4 Visual polish | ✅ (desktop) | All screens, animations, synthesised audio, settings |
 | 5 Full QA | ✅ (desktop) | Everything runnable here has been run; device QA impossible here |
 | 6 Android prep | 🟡 | Debug APK (API 36) ✅, icons ✅, store assets ✅; release AAB ❌ blocked (§8) |
@@ -163,7 +163,7 @@ Legend: ✅ done & verified on desktop · 🟡 done, verification limited · ❌
 ### 8a. Status by category (VERIFIED / IMPLEMENTED, NOT VERIFIED / BLOCKED / NOT STARTED)
 | Area | Status |
 |------|--------|
-| Rules, 40 levels (proven solvable & shortest), hints, economy, save/restore, undo/restart | **VERIFIED** (91 tests, validator, 31 200-action fuzz) |
+| Rules, 80 levels (proven solvable & shortest), hints, economy, save/restore, undo/restart | **VERIFIED** (91 tests, validator, 31 200-action fuzz) |
 | UI/UX improvements (contrast, tags, pills, order, reward animation, layouts) | **VERIFIED** on desktop renders + tests |
 | API-36 debug APK, 0 permissions, signature | **VERIFIED** (`aapt`, `apksigner`) |
 | Android device/emulator behaviour (touch, cutout values, performance, audio, back button) | **BLOCKED** (no device/emulator in this environment) → `docs/DEVICE_TEST_PLAN.md` |
@@ -226,3 +226,5 @@ Known historical bug to keep in mind: packed arrays stored inside an `Array` ali
   blockers, versions). Numbers here must be reproducible with §4.
 * Never mark an item ✅ unless a test, validator run, or inspected artifact proves it; use 🟡/❌ and say why.
 * Constants in §5 must match the code; when they diverge, fix this file (or the code) immediately.
+
+| 2026-11-27 | **Content batch.** Campaign 40 → 80 levels (stages 8–10 "Veteran/Expert/Grandmaster"; heavy specs eased where the generator did not converge). **Daily puzzle** (112 pre-verified pool, date-picked, streak, no coins). **Hindi** (language setting; Auto/English/Hindi). Hint search time-capped (level 63 first hint 12.5 s → <1 s); off-path hints fall back to an honest rewind instruction when the search cannot finish (levels 43/63). | 120/120 tests; validator 80/80 |

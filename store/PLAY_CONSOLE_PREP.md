@@ -22,7 +22,9 @@ Proposed first release: **versionName `1.0.0`, versionCode `1`**. Every later up
 * **Full description (≤4000):**
   Sort shapes into trays — but space is limited, and only the top object can move. Unjam is a relaxing-to-tricky puzzle
   built around one question: who gets the last slot?
-  • 40 handcrafted levels, each solved and checked to guarantee a solution exists
+  • 80 levels across 10 stages, every one solved by a computer check to guarantee a solution exists
+  • A fresh daily puzzle every day, with a streak counter
+  • Available in English and Hindi
   • Easy to learn: tap a tray to lift, tap another to drop
   • New ideas arrive one at a time: tight trays, move limits, padlocks, reserved and one-way trays, ice, and mixes
   • Undo any move for free, restart any time, and use hints when you're stuck

@@ -9,8 +9,11 @@ godot --headless --path . --script res://tools/validate_levels.gd # exhaustive l
 `tests/test_runner.gd` discovers `tests/test_*.gd`; each `test_*` method may `await`
 frames. UI tests drive the real `GameScreen` with taps.
 
-### Latest results (Godot 4.7.1.stable, 2026-10-16; also green on 4.6 and 4.3)
-* **105 tests, 105 passed, 0 failed** (exit code 0)
+### Latest results (Godot 4.7.1.stable, 2026-11-27)
+* **120 tests, 120 passed, 0 failed** (exit code 0)
+  * `test_daily` (7): date→weekday/pool-index mapping, streak rules (consecutive, gap reset, same day, persisted, bad data ignored, lapsed streak shown as 0), daily screen win gives no coins and leaves campaign/session untouched, the shipped 112-puzzle pool validates and ramps Monday→Sunday.
+  * `test_i18n` (7): every campaign/UI string has Hindi, format specifiers preserved, no absurd length growth, locale switching, language setting persists and bad values fall back to auto.
+  * `test_hints_campaign` also: after leaving the authored path every level yields a legal hint or a truthful rewind instruction (undoing that many moves really returns to the authored path); worst off-path hint ≈1.3 s.
   * `test_board_rules` (14): legal/illegal moves, match rule, full trays, clear rule,
     reserved & one-way trays, locks (unlock on clear), ice (thaw by move count), move
     limit failure, deadlock failure, exact undo, undo after failure, restart, clone independence.
@@ -21,7 +24,7 @@ frames. UI tests drive the real `GameScreen` with taps.
     rejection of mismatched session data, no re-fired win/fail signals on restore.
   * `test_hints` (4) + `test_hints_campaign` (1): hints are always legal, following hints wins,
     dead ends are detected without charging, no hint after finishing; hint-following wins
-    **all 40 levels** (worst first-hint time ≈70–80 ms on desktop).
+    **all 80 levels** (worst first-hint time ≈70–80 ms on desktop).
   * `test_campaign` (12): ≥30 levels, every level validates and its solution replays, no
     duplicates/near-duplicates, move limits feasible, mechanics debut one at a time with an
     intro card, difficulty ramp, ids/stages ordered, level 1 trivial, recorded solutions of
@@ -29,7 +32,7 @@ frames. UI tests drive the real `GameScreen` with taps.
   * `test_ui_flow` (5): **repeated taps/undo during an animation change nothing**, full play-through
     pays the reward once (extra win callbacks pay nothing), bad tray index harmless,
     hint charging rules (never overspends), restart asks for confirmation only with progress.
-  * `test_fuzz` (4): 31 200 random taps/moves/undos/restarts over all 40 levels with invariants after every
+  * `test_fuzz` (4): 31 200 random taps/moves/undos/restarts over all 80 levels with invariants after every
     action (capacity, object conservation, status vs model, exact undo, restart, legal-move enumeration
     vs `check_move`, blocked objects never pickable); win on the final allowed move; undo across clears/locks/ice.
   * `test_ui_fuzz` (4): random taps (also hammering during animations), undo, restart, hint and pause on 7
@@ -44,7 +47,7 @@ frames. UI tests drive the real `GameScreen` with taps.
   * `test_progress` also covers all three settings persisting across a restart.
   * `test_services` (4): ad gate grants at most once, never without a request, never faked;
     audio safe with unknown/disabled sounds.
-* **Level validator:** 40 levels, **0 errors, 0 warnings**; exhaustive BFS proved every
+* **Level validator:** 80 levels, **0 errors, 0 warnings**; exhaustive BFS proved every
   recorded solution is the shortest (see `validation_report.txt`).
 * **Runtime log** of a 400-frame launch under Xvfb: no script errors or warnings other than
   the sandbox having no audio device / vsync.

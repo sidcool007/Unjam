@@ -56,3 +56,7 @@ Reinstalled toolchain after a container reset (baseline 99/99). Added debug-only
 ## Colour-blind palette (2026-11-27)
 Okabe-Ito based palette tuned by CVD simulation (min dE >= 28 for the 5 level types under protan/deutan/tritan; default palette red/green dE ~12 under deuteranopia).
 Setting `colorblind` (persisted, validated), live redraw, 4 new tests (105/105). Evidence sheet_5. Settings dialog gained one row.
+
+## Content batch (2026-11-27)
+Campaign 80 levels (validator: 0 errors), daily puzzle (112 verified pool, streak, no coins), Hindi setting (machine-drafted; NOT verified on device; needs native review), hint time cap + rewind fallback. 120/120 tests.
+Not done: device/emulator run, Hindi glyph check, signed AAB, store text in Hindi.

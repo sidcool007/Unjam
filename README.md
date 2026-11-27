@@ -2,7 +2,7 @@
 
 A casual Android sorting puzzle built with **Godot 4.7.1 (GDScript)**. Move objects
 between limited-capacity trays; only the top object moves, and you must decide
-who gets the *last free slot*. 40 original, solver-verified levels, fully offline,
+who gets the *last free slot*. 80 original, solver-verified levels plus a daily puzzle, English and Hindi, fully offline,
 no ads, no account, **no Android permissions**.
 
 Status: release **candidate** — API-36 debug APK builds; **not** yet run on a device, **no** signed release AAB (see `SSOT.md` §8,
