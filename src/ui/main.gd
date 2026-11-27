@@ -19,6 +19,8 @@ func _ready() -> void:
 	_fade.modulate.a = 0.0
 	add_child(_fade)
 	_show(_make_splash())
+	if Autotest.should_run():  # debug builds only; see src/services/autotest.gd
+		Autotest.run.call_deferred(self)
 
 
 func _notification(what: int) -> void:

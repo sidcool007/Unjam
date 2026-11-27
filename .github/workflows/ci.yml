@@ -1,0 +1,115 @@
+name: CI
+
+# Runs on every push/PR: tests + level validation, a debug APK with release-invariant checks,
+# and (on Android emulators) an in-app end-to-end self-test with screenshots/logcat as artifacts.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.1-stable
+
+jobs:
+  test:
+    name: Tests and level validation
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/godot-ci
+          key: godot-editor-${{ env.GODOT_VERSION }}
+      - name: Install Godot
+        run: ./ci/install_godot.sh
+      - name: Import project
+        run: godot --headless --path . --import
+      - name: Unit, UI and fuzz tests
+        run: godot --headless --path . --script res://tests/test_runner.gd
+      - name: Validate all levels (exhaustive shortest-solution proof)
+        run: godot --headless --path . --script res://tools/validate_levels.gd
+
+  apk:
+    name: Debug APK and release-invariant checks
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-ci
+            ~/.local/share/godot/export_templates
+          key: godot-with-templates-${{ env.GODOT_VERSION }}
+      - name: Install Godot and export templates
+        run: WITH_TEMPLATES=1 ./ci/install_godot.sh
+      - name: Android SDK and editor settings
+        run: ./ci/setup_android.sh
+      - name: Export debug APK
+        run: |
+          mkdir -p build
+          godot --headless --path . --import
+          godot --headless --path . --export-debug "Android Debug" build/unjam-debug.apk
+      - name: Verify APK (target SDK 36, zero permissions)
+        run: ./ci/check_apk.sh build/unjam-debug.apk "$ANDROID_HOME/build-tools/36.1.0/aapt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unjam-debug-apk
+          path: build/unjam-debug.apk
+          retention-days: 14
+
+  emulator:
+    name: Android emulator (${{ matrix.name }})
+    needs: apk
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Android 14, Pixel 6 (modern)
+            api: 34
+            target: google_apis
+            profile: pixel_6
+            ram: 3072M
+            cutout: ""
+          - name: Android 10, Nexus 5 (low-end, 1.5 GB RAM, cutout overlay)
+            api: 29
+            target: default
+            profile: Nexus 5
+            ram: 1536M
+            cutout: com.android.internal.display.cutout.emulation.tall
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: unjam-debug-apk
+          path: build
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run smoke and end-to-end self-test on the emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          CUTOUT: ${{ matrix.cutout }}
+        with:
+          api-level: ${{ matrix.api }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          profile: ${{ matrix.profile }}
+          ram-size: ${{ matrix.ram }}
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: ./ci/emulator_smoke.sh build/unjam-debug.apk ci-out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emulator-evidence-api${{ matrix.api }}
+          path: ci-out
+          retention-days: 14

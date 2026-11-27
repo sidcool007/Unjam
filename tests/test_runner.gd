@@ -16,6 +16,11 @@ func _initialize() -> void:
 	files.sort()
 	for f in files:
 		var script: GDScript = load("res://tests/" + f)
+		if script == null or not script.can_instantiate():
+			total += 1
+			failed += 1
+			print("  FAIL %s: script failed to load/parse (see errors above)" % f)
+			continue
 		var tc = script.new()
 		tc.tree = self
 		var methods: Array = []

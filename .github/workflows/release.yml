@@ -1,0 +1,81 @@
+name: Release AAB (manual)
+
+# Builds a SIGNED release Android App Bundle with YOUR upload key and verifies it. It never publishes anything.
+# One-time setup (repository Settings -> Secrets and variables -> Actions -> New repository secret):
+#   ANDROID_UPLOAD_KEYSTORE_BASE64   base64 of your upload keystore  (base64 -w0 unjam-upload.keystore)
+#   ANDROID_UPLOAD_KEY_ALIAS         e.g. unjam-upload
+#   ANDROID_UPLOAD_KEYSTORE_PASSWORD the keystore/key password (PKCS12: same for both)
+# See docs/SIGNING.md. The keystore never enters the repository.
+on:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.1-stable
+  BUNDLETOOL_VERSION: 1.18.1
+
+jobs:
+  aab:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Check that signing secrets exist
+        env:
+          KS: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          AL: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          PW: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KS" ] || [ -z "$AL" ] || [ -z "$PW" ]; then
+            echo "::error::Signing secrets are missing. Create the upload key (docs/SIGNING.md) and add the three repository secrets."
+            exit 1
+          fi
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-ci
+            ~/.local/share/godot/export_templates
+          key: godot-with-templates-${{ env.GODOT_VERSION }}
+      - name: Install Godot and export templates
+        run: WITH_TEMPLATES=1 ./ci/install_godot.sh
+      - name: Android SDK (platform 36, build-tools 36.1.0, NDK) and editor settings
+        run: INSTALL_NDK=1 ./ci/setup_android.sh
+      - name: Install the Android gradle build template
+        run: |
+          mkdir -p android/build
+          unzip -oq ~/.local/share/godot/export_templates/${GODOT_VERSION/-/.}/android_source.zip -d android/build
+          echo -n "${GODOT_VERSION/-/.}" > android/.build_version
+          touch android/build/.gdignore
+      - name: Export signed release AAB
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          KS_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p build
+          echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/upload.keystore"
+          export GODOT_ANDROID_KEYSTORE_RELEASE_PATH="$RUNNER_TEMP/upload.keystore"
+          godot --headless --path . --import
+          godot --headless --path . --export-release "Android Release (AAB)" build/unjam-release.aab
+          rm -f "$RUNNER_TEMP/upload.keystore"
+      - name: Verify the bundle (structure, manifest, signature)
+        env:
+          PW: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+        run: |
+          curl -sSL --fail -o "$RUNNER_TEMP/bundletool.jar" "https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          BT="java -jar $RUNNER_TEMP/bundletool.jar"
+          $BT validate --bundle=build/unjam-release.aab
+          $BT dump manifest --bundle=build/unjam-release.aab | tee "$RUNNER_TEMP/manifest.xml"
+          grep -q 'targetSdkVersion.*36' "$RUNNER_TEMP/manifest.xml" || { echo "::error::target SDK is not 36"; exit 1; }
+          ! grep -q 'uses-permission' "$RUNNER_TEMP/manifest.xml" || { echo "::error::unexpected permissions"; exit 1; }
+          jarsigner -verify -certs build/unjam-release.aab | head -5
+          sha256sum build/unjam-release.aab | tee build/unjam-release.aab.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unjam-release-aab
+          path: |
+            build/unjam-release.aab
+            build/unjam-release.aab.sha256
+          retention-days: 30

@@ -66,3 +66,27 @@ func test_release_preset_targets_aab_with_gradle_and_debug_does_not() -> void:
 			eq(cfg.get_value(p["opts"], "architectures/arm64-v8a"), true, "64-bit ABI included (Play requirement)")
 		else:
 			eq(cfg.get_value(p["opts"], "gradle_build/use_gradle_build"), false)
+
+
+func test_autotest_is_inert_without_its_trigger_file_and_in_release_builds() -> void:
+	var trig := ProjectSettings.globalize_path(Autotest.TRIGGER)
+	if FileAccess.file_exists(Autotest.TRIGGER):
+		DirAccess.remove_absolute(trig)
+	check(not Autotest.should_run(), "no trigger file -> autotest does not run")
+	var src := FileAccess.get_file_as_string("res://src/services/autotest.gd")
+	check(src.contains("OS.is_debug_build()"), "autotest is gated on debug builds (never runs in release exports)")
+
+
+func test_ci_workflows_exist_and_contain_no_literal_secrets() -> void:
+	for f in ["ci.yml", "release.yml"]:
+		var path: String = "res://.github/workflows/" + f
+		check(FileAccess.file_exists(path), f + " exists")
+		var txt: String = FileAccess.get_file_as_string(path)
+		check(not txt.contains("BEGIN PRIVATE KEY"), f + " has no private key")
+		for line in txt.split("\n"):
+			var l := line.strip_edges()
+			if l.to_lower().contains("password") and l.contains(":") and not l.begins_with("#"):
+				check(l.contains("secrets.") or l.contains("$PW") or l.contains("\"$"), "%s: password line must reference a secret, got: %s" % [f, l])
+	var rel: String = FileAccess.get_file_as_string("res://.github/workflows/release.yml")
+	check(rel.contains("workflow_dispatch") and not rel.contains("on:\n  push"), "release workflow is manual only")
+	check(not rel.contains("upload-google-play") and not rel.contains("r0adkll/upload"), "release workflow never publishes to Google Play")

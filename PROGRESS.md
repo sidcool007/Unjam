@@ -48,3 +48,7 @@ Not changed (and why): haptics (needs VIBRATE permission), TalkBack (engine lack
 Baseline 91/91, 40/40, APK 36. Amber triangle: deeper fill + thicker 50 % rim for that shape only (verified in normal/selected/locked/frozen/stacked/page-bg, before/after sheet);
 tray outline token 3.59:1. Tests added for hint-state, dialog hierarchy, result-dialog dismissal, minimum slot size, amber contrast (99/99). Pause position and level-select indicators evaluated and left unchanged
 (provisional, documented). Not changed: haptics (permission), TalkBack (engine), device testing (no device), AAB (SDK host denied + owner key).
+
+## CI batch (2026-11-27)
+Reinstalled toolchain after a container reset (baseline 99/99). Added debug-only on-device autotest, CI scripts/workflows (docs/CI.md), runner hardening (broken test file = failure, not hang).
+101/101 locally; GitHub Actions workflows IMPLEMENTED, NOT VERIFIED until their first run.
