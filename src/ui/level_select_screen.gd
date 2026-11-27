@@ -48,7 +48,7 @@ func _ready() -> void:
 		var stage := int(lv.get("stage", 1))
 		if stage != current_stage:
 			current_stage = stage
-			var head := UI.label("Stage %d · %s" % [stage, CampaignText.STAGES.get(stage, "")], UI.FONT_BODY, UI.INK_SOFT, HORIZONTAL_ALIGNMENT_LEFT)
+			var head := UI.label(tr("Stage %d · %s") % [stage, tr(CampaignText.STAGES.get(stage, ""))], UI.FONT_BODY, UI.INK_SOFT, HORIZONTAL_ALIGNMENT_LEFT)
 			list.add_child(head)
 			grid = GridContainer.new()
 			grid.columns = 4
@@ -118,7 +118,7 @@ func _tile(id: int) -> Control:
 			main.open_game(id)
 		else:
 			Audio.play("invalid")
-			_show_toast("Clear level %d to unlock this one." % (Progress.highest_unlocked)))
+			_show_toast(tr("Clear level %d to unlock this one.") % (Progress.highest_unlocked)))
 	return b
 
 

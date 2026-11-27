@@ -56,7 +56,7 @@ const SPECS := [
 	# ---- Stages 8-10 (levels 41-80): same mechanics, rising pressure
 	{"name": "Second Wind", "stage": 8, "counts": [4, 4, 4, 4, 4], "caps": [4, 4, 4, 4, 4, 4, 4], "empties": 2, "lock": 1, "ice": 1, "ice_min": 3, "ice_max": 9, "lo": 20, "hi": 27, "budget": 250000, "time_limit_s": 150},
 	{"name": "Narrow Path", "stage": 8, "counts": [5, 5, 5, 5], "caps": [5, 5, 5, 5, 5, 5], "empties": 2, "lock": 1, "ice": 2, "ice_min": 3, "ice_max": 9, "lo": 22, "hi": 29, "budget": 250000, "time_limit_s": 150},
-	{"name": "Switchback", "stage": 8, "counts": [3, 4, 5, 4, 4], "caps": [3, 4, 5, 4, 4, 5, 4], "empties": 1, "lock": 2, "ice": 1, "ice_min": 3, "ice_max": 9, "lo": 20, "hi": 27, "budget": 250000, "time_limit_s": 150},
+	{"name": "Switchback", "stage": 8, "counts": [3, 4, 5, 4, 4], "caps": [3, 4, 5, 4, 4, 5, 4], "empties": 2, "lock": 1, "ice": 1, "ice_min": 3, "ice_max": 9, "lo": 20, "hi": 27, "budget": 250000, "time_limit_s": 150},
 	{"name": "Pressure Point", "stage": 8, "counts": [4, 4, 4, 4], "caps": [4, 4, 4, 4, 4, 4], "empties": 1, "lock": 1, "ice": 2, "ice_min": 3, "ice_max": 9, "lo": 19, "hi": 26, "limit": 3, "budget": 250000, "time_limit_s": 150},
 	{"name": "Cold Storage", "stage": 8, "counts": [3, 3, 3, 3, 3], "caps": [3, 3, 3, 3, 3, 3, 3], "empties": 2, "lock": 1, "ice": 1, "ice_min": 3, "ice_max": 9, "lo": 15, "hi": 22, "limit": 3, "budget": 250000, "time_limit_s": 150},
 	{"name": "Lockstep", "stage": 8, "counts": [4, 4, 4, 4, 4], "caps": [4, 4, 4, 4, 4, 4, 4], "empties": 2, "lock": 2, "ice": 2, "ice_min": 3, "ice_max": 9, "lo": 21, "hi": 28, "limit": 3, "budget": 250000, "time_limit_s": 150},

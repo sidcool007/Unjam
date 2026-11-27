@@ -33,8 +33,9 @@ func _draw() -> void:
 	var f := ThemeDB.fallback_font
 	if has_caption:
 		var fs := UI.FONT_SMALL
-		var w := f.get_string_size(caption, HORIZONTAL_ALIGNMENT_CENTER, -1, fs).x
-		draw_string(f, Vector2((size.x - w) / 2.0, size.y * 0.86), caption, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
+		var cap := tr(caption)
+		var w := f.get_string_size(cap, HORIZONTAL_ALIGNMENT_CENTER, -1, fs).x
+		draw_string(f, Vector2((size.x - w) / 2.0, size.y * 0.86), cap, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col)
 	if badge != "":
 		var fs2 := 20
 		var bw := f.get_string_size(badge, HORIZONTAL_ALIGNMENT_CENTER, -1, fs2).x + 18.0

@@ -47,7 +47,7 @@ func _ready() -> void:
 	var prog := VBoxContainer.new()
 	prog.add_theme_constant_override("separation", 8)
 	vb.add_child(prog)
-	prog.add_child(UI.label("%d / %d levels cleared   ·   %d stars" % [done, total, Progress.total_stars()], UI.FONT_SMALL + 2, UI.INK_SOFT))
+	prog.add_child(UI.label(tr("%d / %d levels cleared   ·   %d stars") % [done, total, Progress.total_stars()], UI.FONT_SMALL + 2, UI.INK_SOFT))
 	var bar := Control.new()
 	bar.custom_minimum_size = Vector2(0, 18)
 	bar.draw.connect(func():
@@ -59,7 +59,7 @@ func _ready() -> void:
 
 	var started := Progress.completed.size() > 0 or Progress.session != null or Progress.current_level > 1
 	var cont := Progress.continue_level()
-	var play := UI.button(("Continue · Level %d" % cont) if started else "Play", "primary", UI.FONT_H1)
+	var play := UI.button((tr("Continue · Level %d") % cont) if started else "Play", "primary", UI.FONT_H1)
 	play.custom_minimum_size = Vector2(0, 112)
 	play.pressed.connect(func():
 		Audio.play("tap")
@@ -87,7 +87,7 @@ func _ready() -> void:
 
 	vb.add_child(_spacer(1.8))
 	if Progress.load_status == "recovered_backup" or Progress.load_status == "reset_corrupt":
-		var warn := UI.wrap_label("Your save file could not be read. %s" % ("A backup was restored." if Progress.load_status == "recovered_backup" else "Starting fresh."), UI.FONT_SMALL, UI.ACCENT_DARK)
+		var warn := UI.wrap_label(tr("Your save file could not be read. %s") % tr("A backup was restored." if Progress.load_status == "recovered_backup" else "Starting fresh."), UI.FONT_SMALL, UI.ACCENT_DARK)
 		vb.add_child(warn)
 
 

@@ -5,6 +5,7 @@ extends RefCounted
 const STAGES := {
 	1: "Basics", 2: "Tight Trays", 3: "Move Limits", 4: "Locks",
 	5: "Special Trays", 6: "Ice", 7: "Mastery",
+	8: "Veteran", 9: "Expert", 10: "Grandmaster",
 }
 
 const REASONS := {

@@ -23,6 +23,7 @@ var completed := {}  # level id (int) -> best stars (1..3)
 var tutorial_done := false
 var seen_intros := {}  # level id (int) -> true
 var settings := {"sound": true, "music": true, "reduce_motion": false, "colorblind": false}
+var language := "auto"  # auto | en | hi
 var session: Variant = null  # saved in-progress session dict or null
 var load_status := "new"  # new | ok | recovered_backup | reset_corrupt
 
@@ -154,6 +155,15 @@ func set_setting(key: String, value: bool) -> void:
 ## Mirrors display settings into the static UI tokens (palette choice).
 func _sync_ui_flags() -> void:
 	UI.colorblind = bool(settings.get("colorblind", false))
+	I18n.apply(language)
+
+
+func set_language(lang: String) -> void:
+	if lang in I18n.LANGUAGES:
+		language = lang
+		_sync_ui_flags()
+		save()
+		settings_changed.emit()
 
 
 func save_session(d: Variant) -> void:
@@ -185,6 +195,7 @@ func _set_defaults() -> void:
 	tutorial_done = false
 	seen_intros = {}
 	settings = {"sound": true, "music": true, "reduce_motion": false, "colorblind": false}
+	language = "auto"
 	session = null
 	_sync_ui_flags()
 
@@ -205,6 +216,7 @@ func to_dict() -> Dictionary:
 		"tutorial_done": tutorial_done,
 		"seen_intros": intros,
 		"settings": settings.duplicate(),
+		"language": language,
 		"session": session,
 	}
 
@@ -249,6 +261,7 @@ func apply_dict(d: Variant) -> bool:
 		for k in settings.keys():
 			if st.get(k) is bool:
 				settings[k] = st[k]
+	language = str(d["language"]) if d.get("language") is String and d["language"] in I18n.LANGUAGES else "auto"
 	_sync_ui_flags()
 	if d.get("session") is Dictionary:
 		session = d["session"]  # structurally verified by GameSession.restore_from

@@ -49,7 +49,7 @@ func _draw_track() -> void:
 	var kx := t.size.x - 26.0 if on else 26.0
 	t.draw_circle(Vector2(kx, t.size.y / 2.0), 20.0, Color.WHITE)
 	var f := ThemeDB.fallback_font
-	var s := "ON" if on else "OFF"
+	var s := tr("ON") if on else tr("OFF")
 	var w := f.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 	var tx := 12.0 if on else t.size.x - w - 12.0
 	t.draw_string(f, Vector2(tx, t.size.y / 2.0 + 6.0), s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)

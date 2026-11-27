@@ -86,7 +86,7 @@ func _build_ui(lv: Dictionary) -> void:
 	var titles := VBoxContainer.new()
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titles.add_theme_constant_override("separation", 0)
-	_level_label = UI.label("Level %d" % level_id, UI.FONT_H1)
+	_level_label = UI.label(tr("Level %d") % level_id, UI.FONT_H1)
 	_sub_label = UI.label(str(lv.get("name", "")), UI.FONT_SMALL, UI.INK_SOFT)
 	titles.add_child(_level_label)
 	titles.add_child(_sub_label)
@@ -181,13 +181,13 @@ func _update_hud() -> void:
 	_coins_label.text = str(Progress.coins)
 	if b.max_moves > 0:
 		var left := b.moves_left()
-		_moves_chip.text = "Moves left: %d" % left
+		_moves_chip.text = tr("Moves left: %d") % left
 		_moves_chip.add_theme_stylebox_override("normal", _chip_style(Color("ffd9d3") if left <= 3 else UI.PANEL))
 	else:
-		_moves_chip.text = "Moves: %d" % b.moves
+		_moves_chip.text = tr("Moves: %d") % b.moves
 		_moves_chip.add_theme_stylebox_override("normal", _chip_style(UI.PANEL))
 	var free := b.free_slots()
-	_free_chip.text = "Last slot!" if free == 1 else "Free slots: %d" % free
+	_free_chip.text = tr("Last slot!") if free == 1 else tr("Free slots: %d") % free
 	_free_chip.add_theme_stylebox_override("normal", _chip_style(Color("ffe9a8") if free <= 1 else UI.PANEL))
 	var playing := session.status == GameSession.Status.PLAYING
 	var idle := playing and not board_view.busy and _modal_open == 0
@@ -281,7 +281,7 @@ func _handle_win() -> void:
 	Audio.play("win")
 	_update_hud()
 	_coach.visible = false
-	var m := Modal.make("Level %d clear!" % level_id, false)
+	var m := Modal.make(tr("Level %d clear!") % level_id, false)
 	var stars := Control.new()
 	stars.custom_minimum_size = Vector2(0, 110)
 	var st: int = res["stars"]
@@ -303,13 +303,13 @@ func _handle_win() -> void:
 			stars.create_tween().tween_method(func(v: float):
 				star_t[kk] = v
 				stars.queue_redraw(), 0.0, 1.0, 0.28).set_delay(0.15 + 0.2 * k).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	m.add_text("Solved in %d moves (par %d)" % [session.board.moves, par], UI.INK_SOFT, UI.FONT_BODY)
+	m.add_text(tr("Solved in %d moves (par %d)") % [session.board.moves, par], UI.INK_SOFT, UI.FONT_BODY)
 	if res["coins_awarded"] > 0:
 		var n: int = res["coins_awarded"]
-		var coin_lbl := UI.label("+%d coins" % (n if reduce else 0), UI.FONT_H2)
+		var coin_lbl := UI.label(tr("+%d coins") % (n if reduce else 0), UI.FONT_H2)
 		m.add_content(coin_lbl)
 		if not reduce:
-			coin_lbl.create_tween().tween_method(func(v: float): coin_lbl.text = "+%d coins" % int(round(v)), 0.0, float(n), 0.55).set_delay(0.3)
+			coin_lbl.create_tween().tween_method(func(v: float): coin_lbl.text = tr("+%d coins") % int(round(v)), 0.0, float(n), 0.55).set_delay(0.3)
 		Audio.play("coin")
 	else:
 		m.add_text("Replay: no new coins", UI.INK_SOFT, UI.FONT_SMALL)
@@ -397,18 +397,18 @@ func _on_hint() -> void:
 		HintService.Kind.MOVE:
 			if not Progress.can_afford(Progress.HINT_COST):
 				var m := Modal.make("Not enough coins")
-				m.add_text("A hint costs %d coins and you have %d. Complete levels to earn more." % [Progress.HINT_COST, Progress.coins], UI.INK_SOFT)
+				m.add_text(tr("A hint costs %d coins and you have %d. Complete levels to earn more.") % [Progress.HINT_COST, Progress.coins], UI.INK_SOFT)
 				m.add_button("OK", "primary")
 				_open_modal(m)
 				return
 			var m2 := Modal.make("Need a hint?")
-			m2.add_text("Show a good next move for %d coins? You have %d." % [Progress.HINT_COST, Progress.coins], UI.INK_SOFT)
-			m2.add_button("Show hint (%d)" % Progress.HINT_COST, "primary", func(): _apply_hint(hint))
+			m2.add_text(tr("Show a good next move for %d coins? You have %d.") % [Progress.HINT_COST, Progress.coins], UI.INK_SOFT)
+			m2.add_button(tr("Show hint (%d)") % Progress.HINT_COST, "primary", func(): _apply_hint(hint))
 			m2.add_button("Not now", "secondary")
 			_open_modal(m2)
 		HintService.Kind.UNSOLVABLE:
 			var m3 := Modal.make("This can't be finished")
-			m3.add_text(str(hint["message"]) + "\n\nNo coins were charged.", UI.INK_SOFT)
+			m3.add_text(tr(str(hint["message"])) + tr("\n\nNo coins were charged."), UI.INK_SOFT)
 			if session.can_undo():
 				m3.add_button("Undo last move", "primary", func(): _do_undo())
 			m3.add_button("Restart level", "secondary", func(): _do_restart())
