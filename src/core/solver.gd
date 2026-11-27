@@ -47,7 +47,7 @@ static func _path(parents: Dictionary, k: String) -> Array:
 
 
 ## Weighted best-first search: finds *a* solution quickly (not shortest).
-static func solve_fast(start: BoardState, node_budget: int = 60000, weight: float = 3.0) -> Dictionary:
+static func solve_fast(start: BoardState, node_budget: int = 60000, weight: float = 3.0, max_ms: int = 0) -> Dictionary:
 	if start.is_won():
 		return {"found": true, "moves": [], "expanded": 0, "exhausted": true}
 	var states: Array = [start]
@@ -58,7 +58,10 @@ static func solve_fast(start: BoardState, node_budget: int = 60000, weight: floa
 	var heap_i: Array = []  # node indices
 	_push(heap_p, heap_i, _h(start) * weight, 0)
 	var expanded := 0
+	var t_start := Time.get_ticks_msec()
 	while not heap_i.is_empty():
+		if max_ms > 0 and (expanded & 63) == 63 and Time.get_ticks_msec() - t_start > max_ms:
+			return {"found": false, "moves": [], "expanded": expanded, "exhausted": false}  # out of time, not proven
 		var idx: int = _pop(heap_p, heap_i)
 		var st: BoardState = states[idx]
 		expanded += 1

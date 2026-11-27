@@ -93,5 +93,5 @@ const SPECS := [
 	{"name": "Bottleneck", "stage": 10, "counts": [5, 5, 5, 5], "caps": [5, 5, 5, 5, 5, 5], "empties": 2, "lock": 2, "ice": 2, "accepts": 2, "source_only": 1, "ice_min": 3, "ice_max": 9, "lo": 33, "hi": 40, "limit": 3, "budget": 250000, "time_limit_s": 150},
 	{"name": "Dead Reckoning", "stage": 10, "counts": [3, 4, 5, 4, 4], "caps": [3, 4, 5, 4, 4, 5, 4], "empties": 1, "lock": 3, "ice": 3, "accepts": 1, "source_only": 1, "ice_min": 3, "ice_max": 9, "lo": 29, "hi": 36, "limit": 3, "budget": 250000, "time_limit_s": 150},
 	{"name": "Full Circle", "stage": 10, "counts": [4, 4, 4, 4], "caps": [4, 4, 4, 4, 4, 4], "empties": 1, "lock": 2, "ice": 2, "accepts": 1, "source_only": 1, "ice_min": 3, "ice_max": 9, "lo": 29, "hi": 36, "limit": 3, "budget": 250000, "time_limit_s": 150},
-	{"name": "Endgame", "stage": 10, "counts": [3, 3, 3, 3, 3], "caps": [3, 3, 3, 3, 3, 3, 3], "empties": 2, "lock": 2, "ice": 2, "accepts": 1, "source_only": 1, "ice_min": 3, "ice_max": 9, "lo": 22, "hi": 29, "limit": 3, "budget": 250000, "time_limit_s": 150},
+	{"name": "Endgame", "stage": 10, "counts": [4, 4, 4, 4, 4], "caps": [4, 4, 4, 4, 4, 4, 4], "empties": 2, "lock": 2, "ice": 2, "accepts": 1, "source_only": 1, "ice_min": 3, "ice_max": 9, "lo": 30, "hi": 38, "limit": 3, "budget": 250000, "time_limit_s": 150},
 ]

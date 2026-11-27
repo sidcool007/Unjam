@@ -5,6 +5,9 @@ extends RefCounted
 ## to the level's validated authored solution when the player's history is
 ## still on that path. A move is only recommended if check_move() accepts it.
 
+## A hint must feel instant: the live search is capped, then the authored solution takes over.
+const SEARCH_MAX_MS := 900
+
 enum Kind { MOVE, UNSOLVABLE, UNAVAILABLE }
 
 
@@ -13,7 +16,7 @@ static func get_hint(session: GameSession) -> Dictionary:
 	var b := session.board
 	if session.status != GameSession.Status.PLAYING:
 		return _none("There is nothing to hint right now.")
-	var res := Solver.solve_fast(b, 40000, 3.0)
+	var res := Solver.solve_fast(b, 40000, 3.0, SEARCH_MAX_MS)
 	if res["found"]:
 		var mv: Array = res["moves"][0]
 		if b.check_move(mv[0], mv[1]) == BoardState.Reason.OK:
