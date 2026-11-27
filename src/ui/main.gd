@@ -87,6 +87,18 @@ func open_game(id: int, fresh: bool = false) -> void:
 		return s)
 
 
+func open_daily(_again: bool = false) -> void:
+	if not DailyLibrary.available():
+		open_menu()
+		return
+	var key := DailyLibrary.today_key()
+	_go(func():
+		var s := GameScreen.new()
+		s.main = self
+		s.daily_date = key
+		return s)
+
+
 func _go(factory: Callable) -> void:
 	if _busy:
 		return

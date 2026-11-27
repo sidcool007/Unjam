@@ -10,18 +10,22 @@ extends SceneTree
 ## merge them into levels/campaign.json by appending the lines.
 
 const Specs = preload("res://tools/level_specs.gd")
+const DailySpecs = preload("res://tools/daily_specs.gd")
 
 
 func _init() -> void:
 	var args := OS.get_cmdline_user_args()
-	var specs: Array = Specs.SPECS
+	var daily := args.size() > 0 and args[0] == "daily"
+	if daily:
+		args = args.slice(1)  # daily mode: -- daily first last out.json  (ids = position in the daily pool)
+	var specs: Array = DailySpecs.specs() if daily else Specs.SPECS
 	var first := 1
 	var last := specs.size()
 	if args.size() >= 2:
 		first = int(args[0])
 		last = int(args[1])
 	var existing := {}
-	var f := FileAccess.open("res://levels/campaign.json", FileAccess.READ)
+	var f := FileAccess.open("res://levels/campaign.json", FileAccess.READ) if not daily else null
 	if f != null:
 		var d = JSON.parse_string(f.get_as_text())
 		if d is Dictionary:

@@ -23,6 +23,10 @@ var completed := {}  # level id (int) -> best stars (1..3)
 var tutorial_done := false
 var seen_intros := {}  # level id (int) -> true
 var settings := {"sound": true, "music": true, "reduce_motion": false, "colorblind": false}
+var daily_last := ""  # date key of the last completed daily puzzle
+var daily_streak := 0
+var daily_best := 0
+var daily_stars := 0  # stars earned on daily_last
 var language := "auto"  # auto | en | hi
 var session: Variant = null  # saved in-progress session dict or null
 var load_status := "new"  # new | ok | recovered_backup | reset_corrupt
@@ -78,6 +82,38 @@ func complete_level(id: int, moves: int, par: int) -> Dictionary:
 	coins_changed.emit(coins)
 	progress_changed.emit()
 	return res
+
+
+## Records a finished daily puzzle. No coins, no unlocks. Returns {first_today, streak, stars}.
+func complete_daily(date_key: String, moves: int, par: int) -> Dictionary:
+	var stars := stars_for(moves, par)
+	var day := DailyLibrary.day_number(date_key)
+	if day < 0:
+		return {"first_today": false, "streak": daily_streak, "stars": stars}
+	var first := date_key != daily_last
+	if first:
+		var last_day := DailyLibrary.day_number(daily_last) if daily_last != "" else -99
+		daily_streak = daily_streak + 1 if last_day == day - 1 else 1
+		daily_best = maxi(daily_best, daily_streak)
+		daily_last = date_key
+		daily_stars = stars
+	else:
+		daily_stars = maxi(daily_stars, stars)
+	save()
+	progress_changed.emit()
+	return {"first_today": first, "streak": daily_streak, "stars": daily_stars}
+
+
+func daily_done_today() -> bool:
+	return daily_last == DailyLibrary.today_key()
+
+
+## Streak as it should be shown now: a streak whose last day is older than yesterday has lapsed.
+func daily_streak_now() -> int:
+	if daily_last == "":
+		return 0
+	var gap := DailyLibrary.day_number(DailyLibrary.today_key()) - DailyLibrary.day_number(daily_last)
+	return daily_streak if gap <= 1 else 0
 
 
 func can_afford(amount: int) -> bool:
@@ -196,6 +232,10 @@ func _set_defaults() -> void:
 	seen_intros = {}
 	settings = {"sound": true, "music": true, "reduce_motion": false, "colorblind": false}
 	language = "auto"
+	daily_last = ""
+	daily_streak = 0
+	daily_best = 0
+	daily_stars = 0
 	session = null
 	_sync_ui_flags()
 
@@ -217,6 +257,7 @@ func to_dict() -> Dictionary:
 		"seen_intros": intros,
 		"settings": settings.duplicate(),
 		"language": language,
+		"daily": {"last": daily_last, "streak": daily_streak, "best": daily_best, "stars": daily_stars},
 		"session": session,
 	}
 
@@ -262,6 +303,13 @@ func apply_dict(d: Variant) -> bool:
 			if st.get(k) is bool:
 				settings[k] = st[k]
 	language = str(d["language"]) if d.get("language") is String and d["language"] in I18n.LANGUAGES else "auto"
+	var dd = d.get("daily")
+	if dd is Dictionary and dd.get("last") is String and DailyLibrary.day_number(dd["last"]) >= 0 \
+			and (dd.get("streak") is float or dd.get("streak") is int) and (dd.get("best") is float or dd.get("best") is int):
+		daily_last = dd["last"]
+		daily_streak = clampi(int(dd["streak"]), 0, 100000)
+		daily_best = clampi(int(dd["best"]), daily_streak, 100000)
+		daily_stars = clampi(int(dd.get("stars", 0)), 0, 3) if (dd.get("stars") is float or dd.get("stars") is int) else 0
 	_sync_ui_flags()
 	if d.get("session") is Dictionary:
 		session = d["session"]  # structurally verified by GameSession.restore_from

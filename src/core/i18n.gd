@@ -39,6 +39,14 @@ const HI := {
 	"OFF": "बंद",
 	"Loading…": "लोड हो रहा है…",
 	"Could not load levels:\n": "स्तर लोड नहीं हो सके:\n",
+	# --- daily puzzle
+	"Daily puzzle": "आज की पहेली",
+	"Daily puzzle · done today": "आज की पहेली · पूरी हुई",
+	"Daily puzzle · %d-day streak": "आज की पहेली · %d दिन की लकीर",
+	"Daily puzzle complete!": "आज की पहेली पूरी!",
+	"Streak: %d days": "लगातार: %d दिन",
+	"Come back tomorrow for a new puzzle.": "नई पहेली के लिए कल फिर आइए।",
+	"Back to menu": "मेनू पर वापस",
 	# --- level select
 	"Stage %d · %s": "चरण %d · %s",
 	"Clear level %d to unlock this one.": "इसे खोलने के लिए स्तर %d पूरा करें।",

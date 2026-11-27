@@ -5,6 +5,7 @@ extends Control
 
 var main  # Main (screen host)
 var level_id := 1
+var daily_date := ""  # non-empty = daily puzzle mode (no coins, no campaign progress)
 var session: GameSession
 var board_view: BoardView
 
@@ -27,7 +28,7 @@ var _tutorial := false
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var lv: Dictionary = Levels.get_level(level_id)
+	var lv: Dictionary = DailyLibrary.level_for(daily_date) if is_daily() else Levels.get_level(level_id)
 	session = GameSession.new(lv)
 	_restore_saved_session()
 	_build_ui(lv)
@@ -39,13 +40,20 @@ func _ready() -> void:
 	Progress.settings_changed.connect(func():
 		board_view.reduce_motion = bool(Progress.settings["reduce_motion"])
 		board_view.redraw_all())
-	Progress.set_current_level(level_id)
+	if not is_daily():
+		Progress.set_current_level(level_id)
 	_update_hud()
-	_tutorial = level_id == 1 and not Progress.tutorial_done
+	_tutorial = not is_daily() and level_id == 1 and not Progress.tutorial_done
 	_after_enter.call_deferred()
 
 
+func is_daily() -> bool:
+	return daily_date != ""
+
+
 func _restore_saved_session() -> void:
+	if is_daily():
+		return  # daily puzzles are not resumed after the app is closed
 	var s = Progress.session
 	if s is Dictionary and int(s.get("level", -1)) == level_id:
 		if not session.restore_from(s):
@@ -57,7 +65,7 @@ func _after_enter() -> void:
 		_check_terminal()  # restored into a finished state: show its dialog
 		return
 	var intro: String = str(session.level.get("intro", ""))
-	if intro != "" and not Progress.seen_intros.has(level_id) and not session.has_progress():
+	if intro != "" and not is_daily() and not Progress.seen_intros.has(level_id) and not session.has_progress():
 		Progress.mark_intro_seen(level_id)
 		_show_intro(intro)
 	_update_coach()
@@ -86,8 +94,8 @@ func _build_ui(lv: Dictionary) -> void:
 	var titles := VBoxContainer.new()
 	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	titles.add_theme_constant_override("separation", 0)
-	_level_label = UI.label(tr("Level %d") % level_id, UI.FONT_H1)
-	_sub_label = UI.label(str(lv.get("name", "")), UI.FONT_SMALL, UI.INK_SOFT)
+	_level_label = UI.label(tr("Daily puzzle") if is_daily() else tr("Level %d") % level_id, UI.FONT_H1)
+	_sub_label = UI.label(daily_date if is_daily() else str(lv.get("name", "")), UI.FONT_SMALL, UI.INK_SOFT)
 	titles.add_child(_level_label)
 	titles.add_child(_sub_label)
 	top.add_child(titles)
@@ -247,7 +255,7 @@ func _on_tray_tapped(i: int) -> void:
 
 func _after_move() -> void:
 	_update_hud()
-	if session.status == GameSession.Status.PLAYING:
+	if session.status == GameSession.Status.PLAYING and not is_daily():
 		Progress.save_session(session.to_dict())
 	_update_coach()
 
@@ -274,14 +282,19 @@ func _handle_win() -> void:
 	if _reward_done:
 		return
 	_reward_done = true
-	var par := Levels.par(level_id)
-	var res := Progress.complete_level(level_id, session.board.moves, par)
+	var par := DailyLibrary.par_of(session.level) if is_daily() else Levels.par(level_id)
+	var res: Dictionary
+	if is_daily():
+		res = Progress.complete_daily(daily_date, session.board.moves, par)
+		res["coins_awarded"] = 0
+	else:
+		res = Progress.complete_level(level_id, session.board.moves, par)
 	if _tutorial:
 		Progress.set_tutorial_done()
 	Audio.play("win")
 	_update_hud()
 	_coach.visible = false
-	var m := Modal.make(tr("Level %d clear!") % level_id, false)
+	var m := Modal.make(tr("Daily puzzle complete!") if is_daily() else tr("Level %d clear!") % level_id, false)
 	var stars := Control.new()
 	stars.custom_minimum_size = Vector2(0, 110)
 	var st: int = res["stars"]
@@ -311,15 +324,22 @@ func _handle_win() -> void:
 		if not reduce:
 			coin_lbl.create_tween().tween_method(func(v: float): coin_lbl.text = tr("+%d coins") % int(round(v)), 0.0, float(n), 0.55).set_delay(0.3)
 		Audio.play("coin")
+	elif is_daily():
+		m.add_text(tr("Streak: %d days") % int(res["streak"]), UI.INK, UI.FONT_BODY)
+		m.add_text("Come back tomorrow for a new puzzle.", UI.INK_SOFT, UI.FONT_SMALL)
 	else:
 		m.add_text("Replay: no new coins", UI.INK_SOFT, UI.FONT_SMALL)
-	var has_next := level_id < Levels.count()
-	if has_next:
+	var has_next := (not is_daily()) and level_id < Levels.count()
+	if is_daily():
+		m.add_button("Back to menu", "primary", func(): main.open_menu())
+		m.add_button("Play again", "secondary", func(): main.open_daily(true))
+	elif has_next:
 		m.add_button("Next level", "primary", func(): main.open_game(level_id + 1))
 	else:
 		m.add_text("You finished every level. Thanks for playing!", UI.INK, UI.FONT_BODY)
-	m.add_button("Play again", "secondary", func(): main.open_game(level_id, true))
-	m.add_button("Level select", "ghost", func(): main.open_levels())
+	if not is_daily():
+		m.add_button("Play again", "secondary", func(): main.open_game(level_id, true))
+		m.add_button("Level select", "ghost", func(): main.open_levels())
 	_open_modal(m)
 
 
@@ -331,7 +351,7 @@ func _handle_fail() -> void:
 	if session.can_undo():
 		m.add_button("Undo last move", "primary", func(): _do_undo())
 	m.add_button("Restart level", "secondary", func(): _do_restart())
-	m.add_button("Level select", "ghost", func(): main.open_levels())
+	m.add_button("Back to menu" if is_daily() else "Level select", "ghost", func(): main.open_menu() if is_daily() else main.open_levels())
 	_open_modal(m)
 
 
@@ -361,7 +381,8 @@ func _do_undo() -> void:
 		_terminal_handled = false
 		board_view.clear_hint()
 		board_view.rebuild(true)
-		Progress.save_session(session.to_dict())
+		if not is_daily():
+			Progress.save_session(session.to_dict())
 		_update_hud()
 		_update_coach()
 
@@ -384,7 +405,8 @@ func _do_restart() -> void:
 	_terminal_handled = false
 	board_view.clear_hint()
 	board_view.rebuild(true)
-	Progress.clear_session()
+	if not is_daily():
+		Progress.clear_session()
 	_update_hud()
 	_update_coach()
 
@@ -446,7 +468,7 @@ func _on_pause() -> void:
 	m.add_content(SettingsPanel.make())
 	m.add_button("Resume", "primary")
 	m.add_button("How to play", "secondary", func(): _show_rules())
-	m.add_button("Level select", "ghost", func(): main.open_levels())
+	m.add_button("Back to menu" if is_daily() else "Level select", "ghost", func(): main.open_menu() if is_daily() else main.open_levels())
 	_open_modal(m)
 
 

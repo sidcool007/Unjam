@@ -65,6 +65,19 @@ func _ready() -> void:
 		Audio.play("tap")
 		main.open_game(cont))
 	vb.add_child(play)
+	if DailyLibrary.available():
+		var streak := Progress.daily_streak_now()
+		var dtxt := tr("Daily puzzle")
+		if Progress.daily_done_today():
+			dtxt = tr("Daily puzzle · done today")
+		elif streak > 0:
+			dtxt = tr("Daily puzzle · %d-day streak") % streak
+		var daily := UI.button(dtxt, "secondary")
+		daily.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+		daily.pressed.connect(func():
+			Audio.play("tap")
+			main.open_daily())
+		vb.add_child(daily)
 	var levels := UI.button("Levels", "secondary")
 	levels.pressed.connect(func():
 		Audio.play("tap")
