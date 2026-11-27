@@ -132,3 +132,20 @@ func test_daily_screen_win_gives_no_coins_and_leaves_the_campaign_untouched() ->
 	_screen.queue_free()
 	_stub.queue_free()
 	await tree.process_frame
+
+
+func test_shipped_daily_pool_is_valid_and_ramps_through_the_week() -> void:
+	check(DailyLibrary.load_pool(), "levels/daily.json loads")
+	var pool := DailyLibrary.pool()
+	check(pool.size() >= 7 and pool.size() % 7 == 0, "pool size is a whole number of weeks (%d)" % pool.size())
+	var sums := [0, 0, 0, 0, 0, 0, 0]
+	for i in pool.size():
+		var lv: Dictionary = pool[i]
+		var r := LevelValidator.validate(lv, false)
+		check(r["errors"].is_empty(), "daily %d: %s" % [i + 1, str(r["errors"])])
+		eq(int(lv["id"]), i + 1, "ids are positions")
+		eq(DailyLibrary.par_of(lv), int(lv["par"]), "par = recorded solution length")
+		sums[i % 7] += int(lv["par"])
+	var weeks := pool.size() / 7
+	check(float(sums[0]) / weeks < float(sums[6]) / weeks, "Monday is easier than Sunday on average")
+	check(float(sums[1]) / weeks < float(sums[5]) / weeks, "Tuesday easier than Saturday")
