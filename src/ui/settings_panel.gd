@@ -17,13 +17,15 @@ static func make() -> SettingsPanel:
 
 static func _language_row() -> Control:
 	var r := PanelContainer.new()
-	r.custom_minimum_size = Vector2(0, UI.MIN_TOUCH)
+	r.custom_minimum_size = Vector2(0, UI.MIN_TOUCH + 16)
 	r.add_theme_stylebox_override("panel", UI.box(UI.BG, 26))
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 14)
 	var pad := MarginContainer.new()
 	pad.add_theme_constant_override("margin_left", 22)
 	pad.add_theme_constant_override("margin_right", 14)
+	pad.add_theme_constant_override("margin_top", 8)
+	pad.add_theme_constant_override("margin_bottom", 8)
 	pad.add_child(h)
 	r.add_child(pad)
 	var lbl := UI.label("Language", UI.FONT_BODY, UI.INK, HORIZONTAL_ALIGNMENT_LEFT)

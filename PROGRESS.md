@@ -58,5 +58,6 @@ Okabe-Ito based palette tuned by CVD simulation (min dE >= 28 for the 5 level ty
 Setting `colorblind` (persisted, validated), live redraw, 4 new tests (105/105). Evidence sheet_5. Settings dialog gained one row.
 
 ## Content batch (2026-11-27)
-Campaign 80 levels (validator: 0 errors), daily puzzle (112 verified pool, streak, no coins), Hindi setting (machine-drafted; NOT verified on device; needs native review), hint time cap + rewind fallback. 120/120 tests.
-Not done: device/emulator run, Hindi glyph check, signed AAB, store text in Hindi.
+Campaign 80 levels (validator: 0 errors), daily puzzle (112 verified pool, streak, no coins), Hindi setting (machine-drafted; renders on desktop, NOT verified on device; needs native review; Hindi store text drafted in store/PLAY_CONSOLE_PREP.md §3b), hint time cap + rewind fallback. 120/120 tests.
+Debug APK rebuilt with the new content (target 36, 0 permissions, signature OK); desktop autotest phase1+2 PASS.
+Not done: device/emulator run, Hindi glyph check on Android, signed AAB.

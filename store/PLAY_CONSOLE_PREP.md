@@ -72,3 +72,16 @@ If it applies:
 4. Then use the console's production-access application (answer: testing process, feedback gathered, changes made, readiness).
 5. Review/approval is Google's decision; no date can be promised.
 Status: **not started** (needs a signed AAB, owner's account, and testers).
+
+## 3b. Hindi store listing (draft, machine-written — needs a native speaker's review before use)
+* **Title (≤30):** Unjam: The Last Slot
+* **Short description (≤80):** "आख़िरी खाली जगह किसे मिलेगी — एक शांत और दिमाग़ी पज़ल।"
+* **Full description:**
+  आकृतियों को ट्रे में सजाइए — पर जगह सीमित है और हर ट्रे की सिर्फ़ ऊपरी वस्तु ही हिल सकती है। Unjam एक ही सवाल के इर्द-गिर्द बना है: आख़िरी जगह किसे मिलेगी?
+  • 80 स्तर, हर एक कंप्यूटर से जाँचा हुआ — हल हमेशा मौजूद है
+  • हर दिन एक नई पहेली और लगातार दिनों की गिनती
+  • सीखना आसान: ट्रे छूकर वस्तु उठाइए, दूसरी ट्रे छूकर रखिए
+  • नई चीज़ें एक-एक करके: तंग ट्रे, चाल की सीमा, ताले, आरक्षित और एकतरफ़ा ट्रे, बर्फ़
+  • कोई भी चाल मुफ़्त में पूर्ववत करें, कभी भी फिर शुरू करें, और अटकने पर संकेत लें
+  • पूरी तरह ऑफ़लाइन • कोई विज्ञापन नहीं • कोई खाता नहीं • कोई अनुमति नहीं • आपकी प्रगति आपके डिवाइस पर ही रहती है
+  • रंग-अंधता के अनुकूल: हर वस्तु का अपना आकार भी है और रंग भी; "कम हलचल" विकल्प उपलब्ध

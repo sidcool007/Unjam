@@ -14,7 +14,7 @@
 | Item | State |
 |------|-------|
 | Overall | **Release candidate, desktop-verified, API-36 build. Not device-verified. Not release-signed.** |
-| Gameplay | Complete: 80 levels in 10 stages, **daily puzzle** (112 pre-verified puzzles, weekday difficulty ramp, streak, no coins), tutorial, undo/restart/hints/coins/save, English + Hindi (Hindi machine-drafted, needs native review; glyph rendering NOT verified) |
+| Gameplay | Complete: 80 levels in 10 stages, **daily puzzle** (112 pre-verified puzzles, weekday difficulty ramp, streak, no coins), tutorial, undo/restart/hints/coins/save, English + Hindi (Hindi machine-drafted, needs native review; Devanagari renders correctly in a desktop screenshot, Android rendering NOT verified) |
 | Automated tests | **120 / 120 pass** (exit 0): rules, daily puzzle, localisation, off-path hints, 31 200-action fuzz, UI fuzz, save/economy, hints, campaign, layout (4 phone aspect ratios)/safe-area maths, **contrast tokens**, release-config guard, ad gate |
 | Level validator | **80 levels, 0 errors, 0 warnings** (exit 0); every recorded solution proven shortest by exhaustive search (daily pool: structural + solution-replay validation in `test_daily`) |
 | Debug APK | `build/unjam-debug.apk` (57 133 192 B, git-ignored): **targetSdkVersion 36**, compileSdk 36, min SDK 24, arm64-v8a + x86_64, portrait, **0 permissions**, v2+v3 signature OK (debug key). |
