@@ -72,7 +72,8 @@ func _verify(tag: String) -> bool:
 		if bv.selected_tray < 0 and t.valid_target:
 			failures.append("%s: stale destination highlight on tray %d" % [tag, i])
 			return false
-		if bv.selected_tray >= 0 and t.valid_target != (i != bv.selected_tray and b.check_move(bv.selected_tray, i) == BoardState.Reason.OK):
+		var want := bv.show_move_help and i != bv.selected_tray and b.check_move(bv.selected_tray, i) == BoardState.Reason.OK
+		if bv.selected_tray >= 0 and t.valid_target != want:  # outline only where the teaching aid is on (levels 1-10)
 			failures.append("%s: destination highlight on tray %d disagrees with the rules" % [tag, i])
 			return false
 	return true
