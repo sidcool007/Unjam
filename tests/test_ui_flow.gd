@@ -481,3 +481,38 @@ func test_each_dialog_has_at_most_one_coral_primary_and_results_are_not_dismissi
 	check(fail != null and not fail.dismissible, "fail dialog is not dismissible")
 	check(fail != null and _primary_buttons(fail) <= 1, "fail dialog has at most one primary")
 	await _close()
+
+
+func _any_valid_target_outline() -> bool:
+	for t in _screen.board_view.trays:
+		if t.valid_target:
+			return true
+	return false
+
+
+func test_legal_move_outline_only_on_early_levels() -> void:
+	# Level 3: tapping a tray outlines where it may go (teaching aid).
+	await _open(3)
+	var from := -1
+	for i in _screen.session.board.tray_count():
+		if _screen.session.board.check_pick(i) == BoardState.Reason.OK and not _screen.session.board.legal_moves().filter(func(m): return m[0] == i).is_empty():
+			from = i
+			break
+	check(from >= 0)
+	_screen._on_tray_tapped(from)
+	await _wait_idle()
+	check(_any_valid_target_outline(), "level 3 shows legal destinations after selecting a tray")
+	await _close()
+	# Level 11: no outline; the player must find the move (Hint is the help).
+	await _open(11)
+	var from2 := -1
+	for i in _screen.session.board.tray_count():
+		if _screen.session.board.check_pick(i) == BoardState.Reason.OK and not _screen.session.board.legal_moves().filter(func(m): return m[0] == i).is_empty():
+			from2 = i
+			break
+	check(from2 >= 0)
+	_screen._on_tray_tapped(from2)
+	await _wait_idle()
+	check(_screen.board_view.selected_tray == from2, "the tray is still selected/lifted")
+	check(not _any_valid_target_outline(), "level 11 shows no destination outline")
+	await _close()

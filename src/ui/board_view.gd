@@ -20,6 +20,7 @@ var busy := false:
 				rebuild(false)
 			busy_changed.emit(v)
 var reduce_motion := false
+var show_move_help := true  # green outline on legal destinations after a tray is selected (early levels only)
 var selected_tray := -1
 var _hint_from := -1
 var _hint_to := -1
@@ -153,7 +154,7 @@ func refresh() -> void:
 			ov.set_state(b.is_locked(o), b.thaw_in(o), selected_tray == i and j == list.size() - 1)
 	for i in trays.size():
 		var valid := false
-		if selected_tray >= 0 and i != selected_tray:
+		if show_move_help and selected_tray >= 0 and i != selected_tray:
 			valid = b.check_move(selected_tray, i) == BoardState.Reason.OK
 		trays[i].set_flags(valid, i == selected_tray, i == _hint_to or (i == _hint_from and selected_tray != i))
 

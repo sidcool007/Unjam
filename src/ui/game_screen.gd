@@ -5,6 +5,9 @@ extends Control
 
 var main  # Main (screen host)
 var level_id := 1
+## Levels up to this number show green outlines on legal destinations after a tray is tapped (a teaching aid).
+## Later levels and daily puzzles do not: finding the move is the puzzle, and Hint is the paid help.
+const MOVE_HELP_MAX_LEVEL := 10
 var daily_date := ""  # non-empty = daily puzzle mode (no coins, no campaign progress)
 var session: GameSession
 var board_view: BoardView
@@ -33,6 +36,7 @@ func _ready() -> void:
 	_restore_saved_session()
 	_build_ui(lv)
 	board_view.reduce_motion = bool(Progress.settings["reduce_motion"])
+	board_view.show_move_help = (not is_daily()) and level_id <= MOVE_HELP_MAX_LEVEL
 	board_view.setup(session)
 	board_view.tray_tapped.connect(_on_tray_tapped)
 	board_view.busy_changed.connect(_on_busy_changed)
