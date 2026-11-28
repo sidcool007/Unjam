@@ -34,7 +34,7 @@
 * Touch-first, mouse works on desktop. Local storage only. **No** paid engine/plugins/assets, accounts,
   backend, remote API, AI calls, or network dependency; plays in airplane mode. No live ads / IAP.
 * Original identity, levels and art: all shapes/icons are drawn in code, all audio is synthesised in code.
-* Application id: `com.unjam.thelastslot` (**placeholder** — owner must approve a final id before first upload; proposals in `store/PLAY_CONSOLE_PREP.md`).
+* Application id: `com.sidcool.unjam` (**chosen by the owner 2026-11-28**; becomes permanent at the first Play upload; earlier proposals: proposals in `store/PLAY_CONSOLE_PREP.md`).
 
 ## 3. Repository map (what owns what)
 

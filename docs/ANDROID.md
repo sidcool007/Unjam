@@ -29,7 +29,7 @@ aapt dump badging build/unjam-debug.apk | grep -E "package:|targetSdk|uses-permi
 apksigner verify --verbose build/unjam-debug.apk
 ```
 Preset "Android Debug": no gradle, ABIs arm64-v8a + x86_64, all permissions off, backup off, version `0.1.0` / code `1`,
-application id `com.unjam.thelastslot` (**placeholder**, see `store/PLAY_CONSOLE_PREP.md`). Signed with the standard
+application id `com.sidcool.unjam` (**placeholder**, see `store/PLAY_CONSOLE_PREP.md`). Signed with the standard
 **Android debug key** (a throw-away key outside the repo, `CN=Android Debug`) — for testing only, never for release.
 Latest artifact: `build/unjam-debug.apk`, 57 133 192 bytes (git-ignored; regenerate with the command above).
 `docs/`, `tests/`, `tools/`, `store/`, `*.md` are excluded from the export.

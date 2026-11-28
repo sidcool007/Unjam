@@ -10,11 +10,11 @@ table in which to record results. Do not mark a row Pass unless it was performed
 adb devices                                              # device authorised?
 adb install -r build/unjam-debug.apk                     # debug APK is debuggable → run-as works
 adb logcat -c && adb logcat -s godot AndroidRuntime DEBUG > logcat_<device>.txt &
-adb shell am start -n com.unjam.thelastslot/com.godot.game.GodotApp
-adb shell dumpsys package com.unjam.thelastslot | grep -E "versionName|targetSdk|permission"   # expect no granted permissions
+adb shell am start -n com.sidcool.unjam/com.godot.game.GodotAppLauncher
+adb shell dumpsys package com.sidcool.unjam | grep -E "versionName|targetSdk|permission"   # expect no granted permissions
 ```
-Save location on device: `/data/data/com.unjam.thelastslot/files/` (Godot `user://`), file `unjam_save.json`.
-Useful: `adb shell am force-stop com.unjam.thelastslot` · `adb shell cmd connectivity airplane-mode enable`
+Save location on device: `/data/data/com.sidcool.unjam/files/` (Godot `user://`), file `unjam_save.json`.
+Useful: `adb shell am force-stop com.sidcool.unjam` · `adb shell cmd connectivity airplane-mode enable`
 (or toggle in the UI) · `adb shell input keyevent KEYCODE_BACK` · `adb shell wm size 1080x2400`.
 
 Recommended devices (≥2): (A) low-end/small phone, Android 8–10, ≤2 GB RAM, 16:9–18:9;
@@ -42,7 +42,7 @@ Columns: ID · Test · Expected · Device · Actual · Pass/Fail · Defect ref.
 | P1 | Save/load | Progress, coins, settings survive relaunch | – | – | NOT RUN | – |
 | P2 | Background → resume (≥10 min, memory pressure) | Session restored; no lost/duplicated reward | – | – | NOT RUN | – |
 | P3 | Force-stop mid-level → relaunch | *Continue* resumes board + undo history | – | – | NOT RUN | – |
-| P4 | Corrupt save: `adb shell run-as com.unjam.thelastslot sh -c 'echo garbage > files/unjam_save.json'` | Menu shows "save could not be read"; backup or fresh start; no crash | – | – | NOT RUN | – |
+| P4 | Corrupt save: `adb shell run-as com.sidcool.unjam sh -c 'echo garbage > files/unjam_save.json'` | Menu shows "save could not be read"; backup or fresh start; no crash | – | – | NOT RUN | – |
 | P5 | Truncated/odd JSON (`{"version":1,"coins":-5}`) | Sanitised to defaults for bad fields | – | – | NOT RUN | – |
 | D1 | Portrait layout, system bars | Nothing under status/nav bar; board fully visible | – | – | NOT RUN | – |
 | D2 | Display cutout / rounded corners (device B) | HUD buttons not clipped | – | – | NOT RUN | – |

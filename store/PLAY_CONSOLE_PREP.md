@@ -4,13 +4,10 @@ Nothing in this file has been submitted. No Play Console app exists yet as far a
 possible to check (play.google.com is blocked in the build environment and requires the owner's login).
 Requirements below that I could not verify from an official page in this environment are marked **[CONFIRM]**.
 
-## 1. Application identity (OWNER DECISION — irreversible once published)
-The package name is permanent after the first upload. Current value is a placeholder: `com.unjam.thelastslot`.
-First check Play Console (and your own domains) that it is unused. Proposals, in order of preference:
-1. `io.github.sidcool007.unjam` — tied to the GitHub account `sidcool007` the repository lives under (no domain purchase needed).
-2. `com.<your-owned-domain>.unjam` — if you own a domain (best long-term).
-3. Keep `com.unjam.thelastslot` only if you are certain you will never need a different brand/domain.
-Do **not** change it in `export_presets.cfg` (both presets) until you approve; then run the test-suite (`test_release_config`).
+## 1. Application identity (OWNER DECISION — made 2026-11-28; irreversible once published)
+The owner chose the application id **`com.sidcool.unjam`**. It is set in both export presets (APK and AAB). The package name is permanent after the first upload to Play Console.
+Before the first upload, check in Play Console that the id is not already taken (Play rejects a duplicate at upload time).
+Alternatives that were considered and not chosen: `io.github.sidcool007.unjam` (tied to the GitHub account), `com.<owned-domain>.unjam`.
 Display name: *Unjam: The Last Slot* (title ≤ 30 chars ✔ 21).
 
 ## 2. Version
