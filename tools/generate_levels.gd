@@ -11,6 +11,7 @@ extends SceneTree
 
 const Specs = preload("res://tools/level_specs.gd")
 const DailySpecs = preload("res://tools/daily_specs.gd")
+const ExtSpecs = preload("res://tools/ext_specs.gd")
 
 
 func _init() -> void:
@@ -18,7 +19,7 @@ func _init() -> void:
 	var daily := args.size() > 0 and args[0] == "daily"
 	if daily:
 		args = args.slice(1)  # daily mode: -- daily first last out.json  (ids = position in the daily pool)
-	var specs: Array = DailySpecs.specs() if daily else Specs.SPECS
+	var specs: Array = DailySpecs.specs() if daily else (Specs.SPECS + ExtSpecs.specs())
 	var first := 1
 	var last := specs.size()
 	if args.size() >= 2:
@@ -54,6 +55,8 @@ func _init() -> void:
 			lv = _make_level(id, relaxed)
 		if lv.is_empty():
 			printerr("FAILED to generate level %d (%s)" % [id, specs[i]["name"]])
+			if only_new:
+				continue  # batch mode: skip; the merge step renumbers what succeeded
 			quit(1)
 			return
 		print("level %2d %-18s seed=%d opt=%d moves_limit=%d  %dms" % [id, lv["name"], lv["seed"], lv["par"], lv.get("max_moves", 0), Time.get_ticks_msec() - t0])
@@ -101,16 +104,42 @@ func _make_level(id: int, spec: Dictionary) -> Dictionary:
 		par = moves.size()
 		if par < int(spec["lo"]) or par > int(spec["hi"]):
 			continue
+		# Difficulty by dead ends: reject layouts that random tapping wins too often (no real puzzle).
+		if spec.has("max_trap") and _trap_win_pct(board, seed_v) > float(spec["max_trap"]):
+			continue
 		lv["solution"] = moves
 		lv["par"] = par
 		var slack: int = int(spec.get("limit", 0))
 		if slack > 0:
-			lv["max_moves"] = par + maxi(slack, ceili(par * 0.45))  # generous: casual players, Undo refunds moves
+			lv["max_moves"] = par + maxi(slack, ceili(par * float(spec.get("limit_frac", 0.45))))  # Undo refunds moves; limit_frac tightens it
 		var vr := LevelValidator.validate(lv, false)
 		if not vr["errors"].is_empty():
 			continue
 		return lv
 	return {}
+
+
+## Share (0..100) of random-legal-move rollouts (move limit ignored) that clear the board: a layout-trap measure.
+func _trap_win_pct(board: BoardState, seed_v: int, rollouts: int = 80) -> float:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_v * 7 + 13
+	var base := board.clone()
+	base.max_moves = 0
+	var wins := 0
+	for k in rollouts:
+		var b := base.clone()
+		var steps := 0
+		while steps < 300:
+			if b.is_won():
+				wins += 1
+				break
+			var lm := b.legal_moves()
+			if lm.is_empty():
+				break
+			var mv: Array = lm[rng.randi() % lm.size()]
+			b.apply_move(mv[0], mv[1])
+			steps += 1
+	return 100.0 * float(wins) / float(rollouts)
 
 
 func _structurally_ok(lv: Dictionary) -> bool:
