@@ -2,7 +2,7 @@
 
 Files: `.github/workflows/ci.yml`, `.github/workflows/release.yml`, `ci/*.sh`, `src/services/autotest.gd`.
 
-**Status: IMPLEMENTED, NOT VERIFIED.** The workflows could not be executed from the build environment (no GitHub Actions access;
+**Status: VERIFIED on GitHub Actions (run 18, commit 4d546c3, 2026-11-28): all four jobs green.** (History: the first runs failed because the smoke script launched a non-exported activity; fixed.) The workflows could not be executed from the build environment (no GitHub Actions access;
 Google's SDK host is blocked there). Their *parts* were exercised locally: `ci/install_godot.sh` (editor + templates), the debug export,
 `ci/check_apk.sh`, shell syntax of every script, YAML parsing, and the in-app autotest on desktop (including a real app restart).
 The first run on GitHub is the real verification — see "First run" below.
@@ -36,3 +36,6 @@ the signature, prints the SHA-256 and uploads the bundle as an artifact. **It ne
 2. Watch `CI`. Likely first-run fixes (not guessable from here): runner image details (SDK location/Java), emulator boot flags, a Godot flag change.
    Paste the failing step's log back and it can be fixed quickly.
 3. For a release: create the upload key (`docs/SIGNING.md`), add the 3 secrets, run `Release AAB (manual)`.
+
+## Observed on the API 34 emulator (be honest in reports)
+Launching the app immediately after `adb install` once killed it within ~0.1 s (the Godot activity was destroyed right after resume; Godot's design then force-quits the process). It was not a script error in the game (no FATAL EXCEPTION / SCRIPT ERROR). The smoke script now waits `SETTLE_AFTER_INSTALL` (20 s), retries a dead first launch once with a loud warning, and dumps focused diagnostics (the app's pid lines + `wm_*`/`am_*` lifecycle events) so a recurrence can be diagnosed from the job log. With the settle, the first launch survived in run 18 (1 run — not proof). Real users install through Google Play and do not launch within a second of `adb install`; a physical-device run is still required (`docs/DEVICE_TEST_PLAN.md`).

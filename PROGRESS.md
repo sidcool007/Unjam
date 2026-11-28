@@ -64,3 +64,6 @@ Not done: device/emulator run, Hindi glyph check on Android, signed AAB.
 
 ## First CI run (2026-11-28)
 Test + APK jobs green on GitHub. Emulator jobs failed because the smoke script launched a non-exported activity; now launches the exported alias `GodotAppLauncher`. Re-run pending (emulator evidence NOT YET VERIFIED).
+
+## CI verified (2026-11-28)
+GitHub Actions run 18: tests 120/120, validator 80 levels, debug APK checks, and the emulator end-to-end self-test (real taps, reward, restart, persistence) passed on **Android 10 (low-end) and Android 14**. One observation: a launch right after install died once on API 34 earlier; with a 20 s settle it did not recur (1 run, cause not proven). Physical devices: NOT RUN.
