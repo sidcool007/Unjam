@@ -4,7 +4,7 @@
 # and fails on crashes/ANRs. Evidence (screenshots, logcat, device info) goes to $2.
 #   ci/emulator_smoke.sh build/unjam-debug.apk ci-out
 set -uo pipefail
-APK="${1:?apk}"; OUT="${2:-ci-out}"; PKG="com.unjam.thelastslot"; ACT="$PKG/com.godot.game.GodotApp"
+APK="${1:?apk}"; OUT="${2:-ci-out}"; PKG="com.unjam.thelastslot"; ACT="$PKG/com.godot.game.GodotAppLauncher"  # exported launcher alias (GodotApp itself is not exported)
 mkdir -p "$OUT"
 fail() { echo "SMOKE FAIL: $*"; adb logcat -d > "$OUT/logcat.txt" 2>&1 || true; exit 1; }
 shot() { adb exec-out screencap -p > "$OUT/$1.png" 2>/dev/null || true; }

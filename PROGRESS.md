@@ -61,3 +61,6 @@ Setting `colorblind` (persisted, validated), live redraw, 4 new tests (105/105).
 Campaign 80 levels (validator: 0 errors), daily puzzle (112 verified pool, streak, no coins), Hindi setting (machine-drafted; renders on desktop, NOT verified on device; needs native review; Hindi store text drafted in store/PLAY_CONSOLE_PREP.md §3b), hint time cap + rewind fallback. 120/120 tests.
 Debug APK rebuilt with the new content (target 36, 0 permissions, signature OK); desktop autotest phase1+2 PASS.
 Not done: device/emulator run, Hindi glyph check on Android, signed AAB.
+
+## First CI run (2026-11-28)
+Test + APK jobs green on GitHub. Emulator jobs failed because the smoke script launched a non-exported activity; now launches the exported alias `GodotAppLauncher`. Re-run pending (emulator evidence NOT YET VERIFIED).
