@@ -6,7 +6,14 @@
 set -uo pipefail
 APK="${1:?apk}"; OUT="${2:-ci-out}"; PKG="com.unjam.thelastslot"; ACT="$PKG/com.godot.game.GodotAppLauncher"  # exported launcher alias (GodotApp itself is not exported)
 mkdir -p "$OUT"
-fail() { echo "SMOKE FAIL: $*"; adb logcat -d > "$OUT/logcat.txt" 2>&1 || true; exit 1; }
+fail() {
+  echo "SMOKE FAIL: $*"; adb logcat -d > "$OUT/logcat.txt" 2>&1 || true
+  # Put the evidence in the job log itself so it can be read without downloading the artifact.
+  echo "---- logcat: crashes, Godot and app lines (last 120) ----"
+  grep -E "FATAL EXCEPTION|AndroidRuntime|Fatal signal|ANR in|DEBUG +:|libc +:|godot|Godot|GodotApp|unjam|am_crash|am_proc_died|Process .* has died|ActivityManager.*(unjam|Start proc|Displayed|Killing)" "$OUT/logcat.txt" | tail -120
+  echo "---- running processes ----"; adb shell ps -A 2>/dev/null | grep -i unjam || echo "(unjam is not running)"
+  exit 1
+}
 shot() { adb exec-out screencap -p > "$OUT/$1.png" 2>/dev/null || true; }
 wait_for() { # pattern seconds
   local n=0; while [ $n -lt "$2" ]; do
