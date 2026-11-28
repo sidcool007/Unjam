@@ -39,3 +39,6 @@ the signature, prints the SHA-256 and uploads the bundle as an artifact. **It ne
 
 ## Observed on the API 34 emulator (be honest in reports)
 Launching the app immediately after `adb install` once killed it within ~0.1 s (the Godot activity was destroyed right after resume; Godot's design then force-quits the process). It was not a script error in the game (no FATAL EXCEPTION / SCRIPT ERROR). The smoke script now waits `SETTLE_AFTER_INSTALL` (20 s), retries a dead first launch once with a loud warning, and dumps focused diagnostics (the app's pid lines + `wm_*`/`am_*` lifecycle events) so a recurrence can be diagnosed from the job log. With the settle, the first launch survived in run 18 (1 run — not proof). Real users install through Google Play and do not launch within a second of `adb install`; a physical-device run is still required (`docs/DEVICE_TEST_PLAN.md`).
+
+## Release bundle: first verified run (2026-11-28)
+`Release AAB (manual)` run 1 (commit a49f0d6) built, signed and verified the AAB with the owner's upload key (jarsigner "jar verified"; the "certificate chain invalid" warning is expected for a self-signed upload key — Google Play re-signs with the app signing key). Artifact `unjam-release-aab` (retention 30 days) with its SHA-256. Not uploaded to Play.

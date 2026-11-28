@@ -67,3 +67,6 @@ Test + APK jobs green on GitHub. Emulator jobs failed because the smoke script l
 
 ## CI verified (2026-11-28)
 GitHub Actions run 18: tests 120/120, validator 80 levels, debug APK checks, and the emulator end-to-end self-test (real taps, reward, restart, persistence) passed on **Android 10 (low-end) and Android 14**. One observation: a launch right after install died once on API 34 earlier; with a 20 s settle it did not recur (1 run, cause not proven). Physical devices: NOT RUN.
+
+## First signed release build (2026-11-28)
+App id `com.sidcool.unjam`. Release workflow built and verified a signed AAB (52 MB) from commit a49f0d6 using the owner's upload key. Not uploaded, not installed; real-device test still NOT RUN. Owner must keep the keystore + password backed up.
