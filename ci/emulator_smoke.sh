@@ -25,6 +25,7 @@ until [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1" ]; do sleep
 { echo "== device"; adb shell getprop ro.product.model; adb shell getprop ro.build.version.sdk; adb shell wm size; adb shell wm density
   adb shell dumpsys display | grep -iE "cutout|DisplayInfo" | head -5; } > "$OUT/device.txt" 2>&1
 adb install -r "$APK" || fail "install failed"
+sleep "${SETTLE_AFTER_INSTALL:-20}"  # let package verification / dexopt / Play Protect finish (a launch right after install died once on API 34)
 [ -n "${CUTOUT:-}" ] && { adb shell cmd overlay enable "$CUTOUT" >> "$OUT/device.txt" 2>&1 || echo "cutout overlay not available" >> "$OUT/device.txt"; }
 adb logcat -c
 
@@ -34,10 +35,12 @@ if [ -z "$(adb shell pidof "$PKG" | tr -d '\r')" ]; then
   # Observed on the API 34 emulator: the first launch right after install can die within ~0.1 s.
   # Do not hide it: dump the unfiltered log around the launch, warn loudly, retry once like a user would.
   echo "::warning::first launch after install did not survive (see 'first-launch diagnostics' above); retrying once"
-  echo "---- first-launch diagnostics: unfiltered logcat (all buffers), first 400 lines mentioning the app's launch window ----"
+  echo "---- first-launch diagnostics: the app's own log lines + activity lifecycle events ----"
   adb logcat -d -b all -v threadtime > "$OUT/first_launch_all_buffers.txt" 2>&1 || true
-  L=$(grep -n "START u0 .*$PKG" "$OUT/first_launch_all_buffers.txt" | head -1 | cut -d: -f1); L=${L:-1}
-  tail -n +"$L" "$OUT/first_launch_all_buffers.txt" | head -400
+  APP_PID=$(grep -m1 "am_proc_start.*$PKG" "$OUT/first_launch_all_buffers.txt" | sed -E 's/.*am_proc_start: \[[0-9]+,([0-9]+),.*/\1/')
+  echo "app pid at first launch: ${APP_PID:-unknown}"
+  { grep -E "wm_(create|destroy|finish|pause|stop|resume|restart|relaunch|set_resumed|on_)[a-z_]*:.*(unjam|godot)|am_(proc_start|proc_died|kill|crash|anr|finish_activity|destroy_activity)[a-z_]*:.*(unjam|$APP_PID)|Fatal signal|FATAL EXCEPTION|ANR in" "$OUT/first_launch_all_buffers.txt"
+    [ -n "${APP_PID:-}" ] && awk -v p="$APP_PID" '$3==p' "$OUT/first_launch_all_buffers.txt"; } | sort -u | head -250
   echo "---- activity state ----"; adb shell dumpsys activity activities 2>/dev/null | grep -iE "unjam|mResumed|ResumedActivity|topResumed" | head -10
   adb logcat -c
   adb shell am start -n "$ACT" >/dev/null; sleep 14
